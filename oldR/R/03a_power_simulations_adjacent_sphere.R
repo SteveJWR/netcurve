@@ -1,0 +1,251 @@
+
+
+rm(list = ls())
+
+source("00_functions.R")
+source("clique_finder.R")
+
+
+slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+print(Sys.getenv('SLURM_ARRAY_TASK_ID'))
+if(slurm_arrayid == ""){
+  id = 1
+} else {
+  # coerce the value to an integer
+  id <- as.numeric(slurm_arrayid)
+}
+RNGkind("L'Ecuyer-CMRG")
+set.seed(id)
+
+n.sims = 10 
+n.sims = 2
+plot.width = 30
+plot.height = 14
+plot.dpi = 600
+save.plots <- F
+#units = "cm"
+
+
+
+
+# probability of ending up on which side of the sphere 
+
+mu = -3
+sd = 3
+
+kappa1 = 0.8
+kappa2 = 0.5
+
+res = 1.1
+
+curve.scale <- 10 
+
+
+
+approximate.variance <- 0.25**2
+d.yz.min <- 1.5
+centers.radius = 2.5
+rho = 0.5
+
+
+p1 = 2
+p2 = 2
+q = .5
+
+scale <- 1
+
+scale.set <- c(1/sqrt(2),1,2,4)
+
+ell.set <- round(8 + 4*log2(scale.set))
+
+
+# rule of thumb for number of connections
+
+num.midpoints = 3
+tri.const.seq = (seq(0, 1, length.out = 21)) + 1
+curve.scale = 10
+
+tri.const = 1.6
+
+# the problem is that this seems to be a hard geometry to search for cliques
+#mu <- -4  # mu for spherical ish geometry 
+p.val.results <- matrix(NA, nrow = n.sims, ncol = length(scale.set))
+
+colnames(p.val.results) = paste0("CliqueSize_", ell.set)
+
+time.1 <- Sys.time()
+for(scale.idx in seq(length(scale.set))){
+   
+  scale <- scale.set[scale.idx] 
+  
+  n <- round(5000*scale)
+  #n <- round(3000*sqrt(scale))
+  
+  n.centers1 <- round(50*sqrt(scale))
+  n.centers2 <- round(50*sqrt(scale))
+  
+  ell = round(8 + 4*log2(scale)) # min clique-size 
+  
+  d.yz.min = 1.5
+  if(ell < 8){
+    d.yz.min = 1
+  }
+  #d.yz.max = -log(10/ell^2)
+  d.yz.max = max(log(ell),log(ell^2/10)) 
+  for(sim in seq(n.sims)){
+     
+    PI1 <- as.numeric(rdirichlet(1, rep(2,n.centers1)))
+    PI2 <- as.numeric(rdirichlet(1, rep(2,n.centers2)))
+    
+    nu.vec <- rnorm(n,mean = mu*scale, sd = sd*scale) 
+    nu.vec <- nu.vec*(nu.vec < 0 )
+    nu.vec <- (exp(nu.vec) < 2/sqrt(n))*log(2/sqrt(n)) + (exp(nu.vec) >= 2/sqrt(n))*nu.vec 
+    
+    lpcm <- connected_spheres_lpcm(n, n.centers1, n.centers2, 
+                                   p1,p2,PI1, PI2, nu.vec, 
+                                   q, kappa1,kappa2, 
+                                   approximate.variance, max.rad = centers.radius)
+    
+    #D <- lpcm$D
+    
+    A.sim <- lpcm$A
+    #A.sim <- sim_ls_network(nu.vec, D)
+    
+     
+    if(scale > 1){
+      clique.set <- guided_clique_set(A.sim,lpcm$cluster_labels, 
+                                       min_clique_size = ell)
+    } else {
+      clique.set <- cluster_clique_search_4(A.sim,res = 1.2, min_clique_size = ell)
+      #clique.set <- cluster_clique_search_5(A.sim,res = 1.2, min_clique_size = ell)
+    }
+    
+    print(paste("Number of Cliques of size,",ell,":", length(clique.set)))
+    if(length(clique.set) > 60 ){
+      clique.set <- clique.set[1:60]
+    }
+    if(length(clique.set) > 6){
+      estimates <- estimate_curvature(A.sim, clique.set)
+      
+      norm.curve.test <- normalized_constant_curvature_test_seq(estimates, num.midpoints = num.midpoints,
+                                                                tri.const.seq = tri.const,
+                                                                curve.scale = curve.scale,
+                                                                heavy.tail.scale = T)
+      if(!is.null(norm.curve.test[[1]]$p.value)){
+        p.val.results[sim,scale.idx] = norm.curve.test[[1]]$p.value
+      }
+    }
+    
+    cat(paste("Simulation,", sim,"/",n.sims), end = "\r")
+  }
+  
+  
+  
+  # Example plot of a changepoint problem: 
+  # save one for each sample size 
+  
+  ### 
+ 
+  ## simple ploting of changes and smoothed profile
+  # plot(y.clean, pch=20, col="black")
+  # lines(res.l1$smt, col="red", lwd=2)
+  # lines(y.true.clean, lty=4, col="green", lwd=2)
+  # abline(v=cpt, lty=2, col="red")
+  # abline(v=cpt.true, lty=3, col="green")
+  if(save.plots){
+    y <- estimates$midpoints[1,1]
+    z <- estimates$midpoints[1,2]
+    m <- estimates$midpoints[1,3]
+    D.hat <- estimates$D
+    x.set.1 <- filter_indices_2(D.hat,y,z,m, tri.const = tri.const)
+    kappa.est.1 <- estimate_kappa_set(D.hat,y,z,m,x.set.1)
+    
+    y <- estimates$midpoints[2,1]
+    z <- estimates$midpoints[2,2]
+    m <- estimates$midpoints[2,3]
+    D.hat <- estimates$D
+    x.set.2 <- filter_indices_2(D.hat,y,z,m, tri.const = tri.const)
+    kappa.est.2 <- estimate_kappa_set(D.hat,y,z,m,x.set.2)
+    
+    y <- estimates$midpoints[3,1]
+    z <- estimates$midpoints[3,2]
+    m <- estimates$midpoints[3,3]
+    D.hat <- estimates$D
+    x.set.3 <- filter_indices_2(D.hat,y,z,m, tri.const = tri.const)
+    kappa.est.3 <- estimate_kappa_set(D.hat,y,z,m,x.set.3)
+    
+    if(length(kappa.est.1) == 0){
+      kappa.est.1 <- c()
+    }
+    if(length(kappa.est.2) == 0){
+      kappa.est.2 <- c()
+    }
+    if(length(kappa.est.3) == 0){
+      kappa.est.3 <- c()
+    }
+    
+    plot.file <- paste0("plots/AdjSpheres_CliqueSize_",ell,"_block_",id,".png")
+    plot.title <- paste0("Adjacent Spheres Curvature Clique Size: ",ell)
+    
+    
+    labels <- c(rep(0,length(kappa.est.1)),rep(1,length(kappa.est.2)),rep(2,length(kappa.est.3)))
+    bp.dat <- data.frame(matrix(c(labels, 
+                                  scale_curvature(kappa.est.1,curve.scale),
+                                  scale_curvature(kappa.est.2,curve.scale),
+                                  scale_curvature(kappa.est.3,curve.scale)), ncol = 2))
+    colnames(bp.dat) <- c("group", "curvature")
+    
+    
+    
+    med.1 <- median(scale_curvature(kappa.est.1,curve.scale),na.rm = T)
+    med.2 <- median(scale_curvature(kappa.est.2,curve.scale),na.rm = T)
+    med.3 <- median(scale_curvature(kappa.est.3,curve.scale),na.rm = T)
+    
+    kappa.vec <- c(kappa.est.1,
+                   kappa.est.2,
+                   kappa.est.3)
+    med.group <- median(scale_curvature(kappa.vec,curve.scale),na.rm = T)
+    
+    plt <- ggplot(bp.dat, aes(y = curvature, x = group)) + 
+      geom_jitter() + 
+      geom_vline(xintercept = 0.5, col = "red") + 
+      geom_vline(xintercept = 1.5, col = "red") + 
+      geom_segment(aes(x=-0.5,xend=0.5,y=med.1,yend=med.1), col = "blue", linetype = "dashed") + 
+      geom_segment(aes(x=0.5,xend=1.5,y=med.2,yend=med.2), col = "blue", linetype = "dashed") + 
+      geom_segment(aes(x=1.5,xend=2.5,y=med.3,yend=med.3), col = "blue", linetype = "dashed") + 
+      geom_segment(aes(x=-0.5,xend=2.5,y=med.group,yend=med.group), col = "green", linetype = "dashed") + 
+      xlab("Location") + 
+      ylab("Soft Threshold Curvature") + 
+      ggtitle(plot.title)
+    
+    
+    
+    ggsave(
+      plot.file,
+      plot = plt,
+      device = NULL,
+      path = NULL,
+      scale = 1,
+      width = plot.width,
+      height = plot.height,
+      units = "cm",
+      dpi = plot.dpi
+    )
+  }
+}
+
+csv.file <- paste0("results/adjacent_spheres_results","_block_",id,".csv")
+write.csv(p.val.results, file = csv.file)
+
+time.2 <- Sys.time()
+
+print(paste("Time Difference:",round(time.2 - time.1,3)))
+
+
+
+
+
+
+
+
+
