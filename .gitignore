@@ -1,0 +1,9 @@
+.Rproj.user
+Untitled.R
+oldR/*
+data/*
+ToTrash/*
+BatchFiles/*
+.DS_Store
+results/*
+results/cluster_results/*
