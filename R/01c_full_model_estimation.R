@@ -68,7 +68,7 @@ tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
 max.num.cliques = 35
-num.subsamples = 20 #TODO: Make this 500 again
+num.subsamples = 2 #TODO: Make this 500 again
 max.iter.estimate = 3
 d.yz.min = 1
 
