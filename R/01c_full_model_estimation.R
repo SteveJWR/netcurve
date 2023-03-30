@@ -11,8 +11,7 @@ library(lolaR)
 source("R/00_functions.R")
 #source("R/clique_finder.R")
 #source("R/SubsampleConstantCurvatureTest.R")
-rm(filter_indices) #TODO: Remove this from the 00_functions.R File
-rm(optimal_midpoint_search) #TODO: Remove this from 00_functions.R File
+#rm(optimal_midpoint_search) #TODO: Remove this from 00_functions.R File
 
 
 ### If Running on a cluster

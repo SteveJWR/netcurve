@@ -1254,120 +1254,120 @@ midpoint_objective2 <- function(dxm,dym,dxy){
 # Also could look for midpoints within a certain bias
 # optimal midpoint objective may depend whether we include a restriction
 # that D.hat is in fact a metric
-optimal_midpoint_search <- function(D,top.k = 1, d.yz.min = 1.0,d.yz.max = 2.5){
-  K <- nrow(D)
-  idx.set <- expand.grid(1:K,1:K,1:K)
-  idx.set <- idx.set[idx.set[,1] < idx.set[,2] & idx.set[,2] != idx.set[,3] & idx.set[,1] != idx.set[,3],]
-  n.idx <- nrow(idx.set)
-  obj.val <- sapply(1:n.idx, function(i){
-    y = idx.set[i,1]
-    z = idx.set[i,2]
-    m = idx.set[i,3]
-    dyz <- D[y,z]
-    dym <- D[y,m]
-    dzm <- D[z,m]
-
-    #filter out infinite distances:
-    dist.filter <- ifelse(dzm*dym*dyz == Inf, NaN, 1)
-
-    obj.tmp = midpoint_objective(dzm,dym,dyz)*dist.filter
-    # ideal midpoint will have a d\istance of 1/2
-    # this will also balance the distances
-    # removing sets with large dyz, i.e. a single point mass.
-    out <- abs(obj.tmp - 1/2) + abs(dym - dzm)/dyz + 10000*(dyz > d.yz.max) +  10000*(dyz < d.yz.min)
-    return(out)
-  })
-  # objective value must be > 1/2 by def
-  #
-
-
-  sort.obj <- obj.val[order(obj.val)]
-  ranked.idx <- idx.set[order(obj.val),]
-  #ranked.idx <- ranked.idx[sort.obj, ]
-  selected.set <- c()
-  best.pairs <- matrix(NA, nrow = 0, ncol = 6)
-
-  i = 1
-  # stops the loop if we do not have a full top k which don't overlap
-  while(nrow(best.pairs) < top.k & i <= nrow(ranked.idx)){
-    if(!(any(as.vector(ranked.idx[i,]) %in% selected.set))){
-      D.tmp <- D[as.numeric(ranked.idx[i,]),as.numeric(ranked.idx[i,])]
-      best.pairs <- rbind(best.pairs, c(as.numeric(ranked.idx[i,]), D.tmp[1,3],D.tmp[2,3], D.tmp[1,2]))
-      selected.set <- c(selected.set, c(ranked.idx[i,1],ranked.idx[i,2],ranked.idx[i,3]))
-    }
-
-    i = i+1
-  }
-  colnames(best.pairs) <- c("y","z","m","dym", "dzm", "dyz")
-  rownames(best.pairs) <- NULL
-  return(best.pairs)
-}
-
-
-
-# TODO: replace the existing one with this
-optimal_midpoint_search <- function(D,top.k = 1, d.yz.min = 1.5,d.yz.max = 2.5){
-  K <- nrow(D)
-  idx.set.yz <- expand.grid(1:K,1:K)
-  idx.set.yz <- idx.set.yz[idx.set.yz[,1] < idx.set.yz[,2],]
-  dyz.set <- c()
-  for(k in seq(nrow(idx.set.yz))){
-    dyz.set[k] <- D[as.numeric(idx.set.yz[k,1]), as.numeric(idx.set.yz[k,2])]
-  }
-
-  idx.set.yz <- idx.set.yz[dyz.set < d.yz.max & d.yz.min < dyz.set, ]
-
-  idx.set <- matrix(NA, nrow = 0, ncol = 3)
-  for(k in seq(nrow(idx.set.yz))){
-    idx.block <- expand.grid(idx.set.yz[k,1],idx.set.yz[k,2], 1:K)
-    idx.set <- rbind(idx.set,idx.block)
-  }
-  idx.set <- idx.set[idx.set[,2] != idx.set[,3] & idx.set[,1] != idx.set[,3],]
-
-  n.idx <- nrow(idx.set)
-  obj.val <- sapply(1:n.idx, function(i){
-    y = idx.set[i,1]
-    z = idx.set[i,2]
-    m = idx.set[i,3]
-    dyz <- D[y,z]
-    dym <- D[y,m]
-    dzm <- D[z,m]
-
-    #filter out infinite distances:
-    dist.filter <- ifelse(dzm*dym*dyz == Inf, NaN, 1)
-
-    obj.tmp = midpoint_objective(dzm,dym,dyz)*dist.filter
-    # ideal midpoint will have a distance of 1/2
-    # this will also balance the distances
-    # removing sets with large dyz, i.e. a single point mass.
-    out <- obj.tmp #+ abs(dym - dzm)/dyz #abs(obj.tmp - 1/2) + abs(dym - dzm)/dyz + 10000*(dyz > d.yz.max) +  10000*(dyz < d.yz.min)
-    return(out)
-  })
-  # objective value must be > 1/2 by def
-  #
-
-
-  sort.obj <- obj.val[order(obj.val)]
-  ranked.idx <- idx.set[order(obj.val),]
-  #ranked.idx <- ranked.idx[sort.obj, ]
-  selected.set <- c()
-  best.pairs <- matrix(NA, nrow = 0, ncol = 6)
-
-  i = 1
-  # stops the loop if we do not have a full top k which don't overlap
-  while(nrow(best.pairs) < top.k & i <= nrow(ranked.idx)){
-    if(!(any(as.vector(ranked.idx[i,]) %in% selected.set))){
-      D.tmp <- D[as.numeric(ranked.idx[i,]),as.numeric(ranked.idx[i,])]
-      best.pairs <- rbind(best.pairs, c(as.numeric(ranked.idx[i,]), D.tmp[1,3],D.tmp[2,3], D.tmp[1,2]))
-      selected.set <- c(selected.set, c(ranked.idx[i,1],ranked.idx[i,2],ranked.idx[i,3]))
-    }
-
-    i = i+1
-  }
-  colnames(best.pairs) <- c("y","z","m","dym", "dzm", "dyz")
-  rownames(best.pairs) <- NULL
-  return(best.pairs)
-}
+# optimal_midpoint_search <- function(D,top.k = 1, d.yz.min = 1.0,d.yz.max = 2.5){
+#   K <- nrow(D)
+#   idx.set <- expand.grid(1:K,1:K,1:K)
+#   idx.set <- idx.set[idx.set[,1] < idx.set[,2] & idx.set[,2] != idx.set[,3] & idx.set[,1] != idx.set[,3],]
+#   n.idx <- nrow(idx.set)
+#   obj.val <- sapply(1:n.idx, function(i){
+#     y = idx.set[i,1]
+#     z = idx.set[i,2]
+#     m = idx.set[i,3]
+#     dyz <- D[y,z]
+#     dym <- D[y,m]
+#     dzm <- D[z,m]
+#
+#     #filter out infinite distances:
+#     dist.filter <- ifelse(dzm*dym*dyz == Inf, NaN, 1)
+#
+#     obj.tmp = midpoint_objective(dzm,dym,dyz)*dist.filter
+#     # ideal midpoint will have a d\istance of 1/2
+#     # this will also balance the distances
+#     # removing sets with large dyz, i.e. a single point mass.
+#     out <- abs(obj.tmp - 1/2) + abs(dym - dzm)/dyz + 10000*(dyz > d.yz.max) +  10000*(dyz < d.yz.min)
+#     return(out)
+#   })
+#   # objective value must be > 1/2 by def
+#   #
+#
+#
+#   sort.obj <- obj.val[order(obj.val)]
+#   ranked.idx <- idx.set[order(obj.val),]
+#   #ranked.idx <- ranked.idx[sort.obj, ]
+#   selected.set <- c()
+#   best.pairs <- matrix(NA, nrow = 0, ncol = 6)
+#
+#   i = 1
+#   # stops the loop if we do not have a full top k which don't overlap
+#   while(nrow(best.pairs) < top.k & i <= nrow(ranked.idx)){
+#     if(!(any(as.vector(ranked.idx[i,]) %in% selected.set))){
+#       D.tmp <- D[as.numeric(ranked.idx[i,]),as.numeric(ranked.idx[i,])]
+#       best.pairs <- rbind(best.pairs, c(as.numeric(ranked.idx[i,]), D.tmp[1,3],D.tmp[2,3], D.tmp[1,2]))
+#       selected.set <- c(selected.set, c(ranked.idx[i,1],ranked.idx[i,2],ranked.idx[i,3]))
+#     }
+#
+#     i = i+1
+#   }
+#   colnames(best.pairs) <- c("y","z","m","dym", "dzm", "dyz")
+#   rownames(best.pairs) <- NULL
+#   return(best.pairs)
+# }
+#
+#
+#
+# # TODO: replace the existing one with this
+# optimal_midpoint_search <- function(D,top.k = 1, d.yz.min = 1.5,d.yz.max = 2.5){
+#   K <- nrow(D)
+#   idx.set.yz <- expand.grid(1:K,1:K)
+#   idx.set.yz <- idx.set.yz[idx.set.yz[,1] < idx.set.yz[,2],]
+#   dyz.set <- c()
+#   for(k in seq(nrow(idx.set.yz))){
+#     dyz.set[k] <- D[as.numeric(idx.set.yz[k,1]), as.numeric(idx.set.yz[k,2])]
+#   }
+#
+#   idx.set.yz <- idx.set.yz[dyz.set < d.yz.max & d.yz.min < dyz.set, ]
+#
+#   idx.set <- matrix(NA, nrow = 0, ncol = 3)
+#   for(k in seq(nrow(idx.set.yz))){
+#     idx.block <- expand.grid(idx.set.yz[k,1],idx.set.yz[k,2], 1:K)
+#     idx.set <- rbind(idx.set,idx.block)
+#   }
+#   idx.set <- idx.set[idx.set[,2] != idx.set[,3] & idx.set[,1] != idx.set[,3],]
+#
+#   n.idx <- nrow(idx.set)
+#   obj.val <- sapply(1:n.idx, function(i){
+#     y = idx.set[i,1]
+#     z = idx.set[i,2]
+#     m = idx.set[i,3]
+#     dyz <- D[y,z]
+#     dym <- D[y,m]
+#     dzm <- D[z,m]
+#
+#     #filter out infinite distances:
+#     dist.filter <- ifelse(dzm*dym*dyz == Inf, NaN, 1)
+#
+#     obj.tmp = midpoint_objective(dzm,dym,dyz)*dist.filter
+#     # ideal midpoint will have a distance of 1/2
+#     # this will also balance the distances
+#     # removing sets with large dyz, i.e. a single point mass.
+#     out <- obj.tmp #+ abs(dym - dzm)/dyz #abs(obj.tmp - 1/2) + abs(dym - dzm)/dyz + 10000*(dyz > d.yz.max) +  10000*(dyz < d.yz.min)
+#     return(out)
+#   })
+#   # objective value must be > 1/2 by def
+#   #
+#
+#
+#   sort.obj <- obj.val[order(obj.val)]
+#   ranked.idx <- idx.set[order(obj.val),]
+#   #ranked.idx <- ranked.idx[sort.obj, ]
+#   selected.set <- c()
+#   best.pairs <- matrix(NA, nrow = 0, ncol = 6)
+#
+#   i = 1
+#   # stops the loop if we do not have a full top k which don't overlap
+#   while(nrow(best.pairs) < top.k & i <= nrow(ranked.idx)){
+#     if(!(any(as.vector(ranked.idx[i,]) %in% selected.set))){
+#       D.tmp <- D[as.numeric(ranked.idx[i,]),as.numeric(ranked.idx[i,])]
+#       best.pairs <- rbind(best.pairs, c(as.numeric(ranked.idx[i,]), D.tmp[1,3],D.tmp[2,3], D.tmp[1,2]))
+#       selected.set <- c(selected.set, c(ranked.idx[i,1],ranked.idx[i,2],ranked.idx[i,3]))
+#     }
+#
+#     i = i+1
+#   }
+#   colnames(best.pairs) <- c("y","z","m","dym", "dzm", "dyz")
+#   rownames(best.pairs) <- NULL
+#   return(best.pairs)
+# }
 
 
 
@@ -1818,31 +1818,31 @@ colSDs <- function(df, ...){
 # }
 
 
-filter_indices <- function(D,y,z,m, c1 = 1/2,c2 = 2,c3 = 0.5){
-  K = nrow(D)
-  x.set <- 1:K
-  x.set <- x.set[-c(y,z,m)]
-
-  #indicator of whether to include an x
-  x.id <- sapply(x.set, function(x){
-    # ensuring that the distance is not infinite to each of x.y.m
-    if(is.infinite(D[x,y]) | is.infinite(D[x,z]) | is.infinite(D[x,m])){
-      return(F)
-    } else {
-      i1 = (c1)*D[y,z] <= D[x,y]
-      i2 = (c1)*D[y,z] <= D[x,z]
-      i3 = D[x,z] <= (c2)*D[y,z]
-      i4 = D[x,y] <= (c2)*D[y,z]
-      #i5 = abs(D[x,y]^2 - D[x,z]^2) <= c3*(D[x,y] + D[x,z] - D[y,z])
-      i5 = abs(D[x,y] - D[x,z]) <= 2*c3*(D[y,z])
-      #i5 = T
-      return(ifelse(i1*i2*i3*i4*i5 == 1, T, F))
-    }
-
-  })
-  x.filtered <- x.set[x.id]
-  return(x.filtered)
-}
+# filter_indices <- function(D,y,z,m, c1 = 1/2,c2 = 2,c3 = 0.5){
+#   K = nrow(D)
+#   x.set <- 1:K
+#   x.set <- x.set[-c(y,z,m)]
+#
+#   #indicator of whether to include an x
+#   x.id <- sapply(x.set, function(x){
+#     # ensuring that the distance is not infinite to each of x.y.m
+#     if(is.infinite(D[x,y]) | is.infinite(D[x,z]) | is.infinite(D[x,m])){
+#       return(F)
+#     } else {
+#       i1 = (c1)*D[y,z] <= D[x,y]
+#       i2 = (c1)*D[y,z] <= D[x,z]
+#       i3 = D[x,z] <= (c2)*D[y,z]
+#       i4 = D[x,y] <= (c2)*D[y,z]
+#       #i5 = abs(D[x,y]^2 - D[x,z]^2) <= c3*(D[x,y] + D[x,z] - D[y,z])
+#       i5 = abs(D[x,y] - D[x,z]) <= 2*c3*(D[y,z])
+#       #i5 = T
+#       return(ifelse(i1*i2*i3*i4*i5 == 1, T, F))
+#     }
+#
+#   })
+#   x.filtered <- x.set[x.id]
+#   return(x.filtered)
+# }
 
 
 
