@@ -1,17 +1,19 @@
 ########################
+#devtools::install_github("SteveJWR/lolaR", ref = "main")
 
-
-# Script to ensure consistency of curvature estimations and 
+# Script to ensure consistency of curvature estimations and
 # ensure that the constant curvature test is valid
 #
-# 
+#
 rm(list = ls())
 
 library(lolaR)
 source("R/00_functions.R")
-source("R/clique_finder.R")
-source("R/SubsampleConstantCurvatureTest.R")
-rm(filter_indices)
+#source("R/clique_finder.R")
+#source("R/SubsampleConstantCurvatureTest.R")
+rm(filter_indices) #TODO: Remove this from the 00_functions.R File
+rm(optimal_midpoint_search) #TODO: Remove this from 00_functions.R File
+
 
 ### If Running on a cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
@@ -22,15 +24,15 @@ if(slurm_arrayid == ""){
   # coerce the value to an integer
   id <- as.numeric(slurm_arrayid)
 }
-#Setting seed for reproducibility, but having a different 
-#seed for parallel branches 
+#Setting seed for reproducibility, but having a different
+#seed for parallel branches
 set.seed(id)
 
-# Partitioning the simulations for running on the cluster 
+# Partitioning the simulations for running on the cluster
 kappa.idx <- floor(id/20) + 1
-block <-  id %% 20 
+block <-  id %% 20
 if(block == 0){
-  block = 20 
+  block = 20
 }
 n.sims = 10
 sim.idx <- 1:n.sims
@@ -38,7 +40,7 @@ sim.idx <- 1:n.sims
 
 
 # Simulation Parameters
-# Values of kappa to iterate 
+# Values of kappa to iterate
 kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 kappa = kappa.set[kappa.idx]
 # Radius of the latent GMM
@@ -49,7 +51,7 @@ if(kappa < 0){
 }
 centers.variance = 0.5**2
 
-# scale parameter for the size of the network 
+# scale parameter for the size of the network
 scale.set <- c(1/sqrt(2),1,2,4)
 
 # parameters for the distribution of the latent traits
@@ -60,28 +62,30 @@ sim.avg.variance <- 0.25**2 # average variance the variance of the clusters of t
 p = 3 # Latent Dimension of the data
 
 
-# Method Tuning Parameters 
-num.midpoints = 3 #TODO: Change this to J 
+# Method Tuning Parameters
+num.midpoints = 3
+tri.const = 1.2
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
+max.num.cliques = 60
+num.subsamples = 200
 
-
-# Recorded simulated graph statistics 
+# Recorded simulated graph statistics
 graph.stat.names <- c("Graph size",
-                      "Edge fraction", 
-                      "Max Degree", 
-                      "Mean Degree", 
-                      "Distinct Cliques >= l", 
-                      "Max Clique Size", 
+                      "Edge fraction",
+                      "Max Degree",
+                      "Mean Degree",
+                      "Distinct Cliques >= l",
+                      "Max Clique Size",
                       "Mean Degree Centrality")
 
 
 
 # matrix arrays for storing results
-kappa.ests.results <- matrix(NA,nrow = n.sims*length(tri.const.seq), 
+kappa.ests.results <- matrix(NA,nrow = n.sims*length(tri.const.seq),
                              ncol = length(scale.set) + 1)
-sl.kappa.est.results <- matrix(NA,nrow = n.sims, 
-                               ncol = length(scale.set) + 1) 
+sl.kappa.est.results <- matrix(NA,nrow = n.sims,
+                               ncol = length(scale.set) + 1)
 p.val.results <- matrix(NA, nrow = n.sims*length(tri.const.seq),
                         ncol = length(scale.set) + 1)
 normalized.p.val.results <- p.val.results
@@ -90,74 +94,62 @@ p.val.sub.results <- matrix(NA, nrow = n.sims,
                             ncol = length(scale.set))
 
 
-# Additional Simulation Parameters 
-get.largest.clique = F 
+# Additional Simulation Parameters
+get.largest.clique = F
 
 time.1 <- Sys.time()
 for(scale.idx in seq(length(scale.set))){
-  
+
   scale <- scale.set[scale.idx]
   n <- round(5000*scale)
-  
+
   n.centers <- round(100*sqrt(scale))
-  ell = round(8 + 4*log2(scale)) # min clique-size 
-  approximate.variance <- sim.avg.variance        
-  
-  # TODO: Ensure that this tuning parameter is > 1 as a default. 
+  ell = round(8 + 4*log2(scale)) # min clique-size
+  approximate.variance <- sim.avg.variance
+
 
   d.yz.min = 1.5
-  if(ell < 8){
+  #TODO: Change back
+  if(ell < 18){
     d.yz.min = 1
   }
   #d.yz.max = -log(10/ell^2)
-  d.yz.max = max(log(ell),log(ell^2/10)) 
-  
+  d.yz.max = max(log(ell),log(ell^2/10))
+
   graph.stats <- matrix(NA, nrow = n.sims, ncol = length(graph.stat.names))
   colnames(graph.stats) <- graph.stat.names
-  
-  
-  
+
+
+
   for(sim in sim.idx){
-    
+
     print(paste("Simulation:", sim, "/",n.sims))
-    
+
     PI <- as.numeric(rdirichlet(1, rep(2,n.centers)))
-    
+
     cluster.model.variance = rgamma(n.centers, shape = approximate.variance)
-    
+
     lpcm <- latent_position_cluster_model(n,n.centers, p,
                                           centers.radius,
                                           kappa,
                                           cluster.model.variance,
                                           PI = PI)
-    # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa, 
+    # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa,
     #                                         centers.variance =centers.variance,
-    #                                         cluster.variance = approximate.variance, 
+    #                                         cluster.variance = approximate.variance,
     #                                         PI = PI)
     Z <- lpcm$Z
-    
-    nu.vec <- rnorm(n,mean = mu*scale, sd = sd*scale) 
+
+    nu.vec <- rnorm(n,mean = mu*scale, sd = sd*scale)
     nu.vec <- nu.vec*(nu.vec < 0)
-    nu.vec <- (exp(nu.vec) < 2/sqrt(n))*log(2/sqrt(n)) + (exp(nu.vec) >= 2/sqrt(n))*nu.vec 
-    
-    
+    nu.vec <- (exp(nu.vec) < 2/sqrt(n))*log(2/sqrt(n)) + (exp(nu.vec) >= 2/sqrt(n))*nu.vec
+
+
     A.sim <- sim_ls_network_fast_2(nu.vec, Z, kappa)
     d.sim <- colSums(A.sim)
-    
-    # if(sim == 1 & plot.graph = T){
-    #   A.noiso <- A.sim[d.sim > 0, d.sim > 0]
-    #   #A.noiso <- A
-    #   A.noiso <- A.noiso[1:2000,1:2000]
-    #   d.noiso <- colSums(A.noiso)
-    #   A.noiso <- A.noiso[d.noiso > 0, d.noiso > 0 ]
-    #   g <- igraph::graph_from_adjacency_matrix(A.noiso, mode = "undirected")
-    #   V(g)$labels = NA
-    #   plot(g, vertex.size= 2,vertex.label=NA)
-    #   
-    # }
-    
+
     # don't compute max clique
-    if(get.largest.clique) { 
+    if(get.largest.clique) {
       if(scale < 4 & (scale < 2 | kappa >= 0)){
         g.large <- igraph::graph_from_adjacency_matrix(A.sim, mode = "undirected")
         #full.cliques <- largest_cliques(g.large)
@@ -169,95 +161,102 @@ for(scale.idx in seq(length(scale.set))){
     } else {
       max.clique.size <- NA
     }
-    
-    
-  
+
     print(paste("Max cliques size:",max.clique.size))
-    
+
     # Just search for cliques
-    clique.set <- guided_clique_set(A.sim,lpcm$cluster_labels, 
+    clique.set <- guided_clique_set(A.sim,lpcm$cluster_labels,
                                     min_clique_size = ell)
-    
+
     clique.set <- clique_split(clique.set, min_clique_size = ell)
-    
+
     print(paste("Number of Cliques of size,",ell,":", length(clique.set)))
-    
-    graph.stats[sim,1] <- n # Size 
+
+    graph.stats[sim,1] <- n # Size
     graph.stats[sim,2] <- sum(A.sim)/(length(A.sim) - n) # edge density
     graph.stats[sim,3] <- max(d.sim) # maximum degree
     graph.stats[sim,4] <- mean(d.sim) # mean degree
     graph.stats[sim,5] <- length(clique.set) # number of cliques found
     graph.stats[sim,6] <- max.clique.size # largest clique
-    
+
     g <- igraph::graph_from_adjacency_matrix(A.sim, mode = "undirected")
     graph.stats[sim,7] <- mean(igraph::centr_eigen(g)$vector) # average eigenvector centrality
-    
-    clique.set.long <- clique.set
-    if(length(clique.set.long) > 60 ){
-      clique.set.long <- clique.set.long[1:60]
+
+
+    clique.set <- clique.set
+    if(length(clique.set) > max.num.cliques ){
+      clique.set <- clique.set[1:max.num.cliques]
     }
-  
-    
-    
+
     D.hat <- lolaR::EstimateD(A.sim, clique.set)
-    
-    #TODO: Add this function to lolaR 
-    reference.set <- selectReference(D.hat,
-                                     J = num.midpoints, 
-                                     tri.const = 1.4)
-    
-    #TODO: Add this function to lolaR 
-    cc.test <- SubSampleConstantCurvatureTest(A.sim,
-                                              clique.set,
-                                              reference.set, 
-                                              B = 200)
+
+    # Select the reference set
+    reference.set <- lolaR::selectReference(D.hat,
+                                            J = num.midpoints,
+                                            tri.const = tri.const,
+                                            d.yz.min = d.yz.min,
+                                            d.yz.max = d.yz.max)
+
+    cc.test <- lolaR::SubSampleConstantCurvatureTest(A.sim,
+                                                     clique.set,
+                                                     reference.set,
+                                                     B = num.subsamples)
 
     p.val.sub.results[sim,scale.idx] <- cc.test$`p.value`
-    
-    #TODO: Add this function to lolaR 
-    pre.computed.p.values <- SubSampleConstantCurvatureTestMultipleThresholds(A.sim, 
-                                                                              clique.set, 
-                                                                              D.subsample = cc.test$`D.subs`, 
-                                                                              tri.const.seq = tri.const.seq, 
-                                                                              J = num.midpoints)
-    
-    for(tri.const.idx in seq(length(tri.const.seq))){
-      
-      tri.const = tri.const.seq[tri.const.idx]
-      res.idx <- n.sims*(tri.const.idx - 1) + sim
-      
-      
-      reference.set <- selectReference(D.hat,
-                                       J = num.midpoints, 
-                                       tri.const = tri.const)
-      
-      estimates <- lolaR::EstimateKappaSet(D.hat, 
-                              reference.set[[1]][["y"]], 
-                              reference.set[[1]][["z"]], 
-                              reference.set[[1]][["m"]],
-                              reference.set[[1]][["xset"]])
-      
-      
-      #best.estimates <- norm.curve.test[[tri.const.idx]]$estimates[norm.curve.test[[tri.const.idx]]$estimates[,1] == 1, 2]
-      
-      p.val <- pre.computed.p.values$p.value[tri.const.idx]
 
-      kappa.med <- median(estimates, na.rm = T)
+    #p.values from multiple thresholds of tri.const
+    #This uses the previously subsampled values of the matrix
+    p.values.mult.thresholds <- SubSampleConstantCurvatureTestMultipleThresholds(D.hat = D.hat,
+                                                                                 D.subsample = cc.test$`D.subs`,
+                                                                                 reference.set = reference.set,
+                                                                                 tri.const.seq = tri.const.seq,
+                                                                                 verbose = F)
+
+    for(tri.const.idx in seq(length(tri.const.seq))){
+
+      tri.const.tmp = tri.const.seq[tri.const.idx]
+      res.idx <- n.sims*(tri.const.idx - 1) + sim
+
+
+      reference.set.tmp = reference.set
+      y <- reference.set.tmp[[1]]$y
+      z <- reference.set.tmp[[1]]$z
+      m <- reference.set.tmp[[1]]$m
+
+      x.set.tmp <- filter_indices(D.hat,y,z,m, tri.const = tri.const.tmp)
+      reference.set.tmp[[1]]$xset = x.set.tmp
+      if(length(x.set.tmp) > 0 ){
+        estimates <- lolaR::EstimateKappaSet(D.hat,
+                                             reference.set.tmp[[1]][["y"]],
+                                             reference.set.tmp[[1]][["z"]],
+                                             reference.set.tmp[[1]][["m"]],
+                                             reference.set.tmp[[1]][["xset"]])
+
+        kappa.med <- median(estimates, na.rm = T)
+      } else {
+        kappa.med <- NA
+      }
+
+      #best.estimates <- norm.curve.test[[tri.const.idx]]$estimates[norm.curve.test[[tri.const.idx]]$estimates[,1] == 1, 2]
+
+      p.val <- p.values.mult.thresholds$p.value[tri.const.idx]
+
+
       kappa.ests.results[res.idx,scale.idx] = kappa.med
       p.val.results[res.idx,scale.idx] = p.val
-      
+
       # if(!is.null(norm.curve.test[[tri.const.idx]]$estimates)){
       #   kappa.med <- median(best.estimates, na.rm = T)
       #   kappa.ests.results[res.idx,scale.idx] = kappa.med
       #   p.val.results[res.idx,scale.idx] = p.val
       #   #normalized.p.val.results[res.idx,scale.idx] = norm.p.val
       # }
-      kappa.ests.results[res.idx,length(scale.set) + 1] = tri.const
-      p.val.results[res.idx,length(scale.set) + 1] = tri.const
-      #normalized.p.val.results[res.idx,length(scale.set) + 1] = tri.const
+      kappa.ests.results[res.idx,length(scale.set) + 1] = tri.const.tmp
+      p.val.results[res.idx,length(scale.set) + 1] = tri.const.tmp
+      #normalized.p.val.results[res.idx,length(scale.set) + 1] = tri.const.tmp
     }
   }
-  #If tracking the graph statistics, uncomment. 
+  #If tracking the graph statistics, uncomment.
   #file.graph.stats <- paste0("results/graph_stats_kappa_",kappa,"_scale_",round(scale,1),"_block_",block,".csv")
   #write.csv(graph.stats, file = file.graph.stats)
 }
