@@ -104,7 +104,7 @@ for(scale.idx in seq(length(scale.set))){
 
   scale <- scale.set[scale.idx]
 
-  # TODO: replace back the factor of 1/2
+
   n <- round((3/4)*5000*scale)
   n.centers <- round((3/4)*100*sqrt(scale))
 
