@@ -34,7 +34,7 @@ block <-  id %% 20
 if(block == 0){
   block = 20
 }
-n.sims = 10
+n.sims = 2 #TODO: Make this 10 again
 sim.idx <- 1:n.sims
 
 
@@ -68,7 +68,7 @@ tri.const = 1.2
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
 max.num.cliques = 60
-num.subsamples = 200
+num.subsamples = 2 #TODO: Make this 500 again
 
 # Recorded simulated graph statistics
 graph.stat.names <- c("Graph size",
