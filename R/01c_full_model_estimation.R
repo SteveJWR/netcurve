@@ -88,8 +88,8 @@ kappa.ests.results <- matrix(NA,nrow = n.sims*length(tri.const.seq),
                              ncol = length(scale.set) + 1)
 # sl.kappa.est.results <- matrix(NA,nrow = n.sims,
 #                                ncol = length(scale.set) + 1)
-# p.val.results <- matrix(NA, nrow = n.sims*length(tri.const.seq),
-#                         ncol = length(scale.set) + 1)
+p.val.results <- matrix(NA, nrow = n.sims*length(tri.const.seq),
+                        ncol = length(scale.set) + 1)
 # normalized.p.val.results <- p.val.results
 
 p.val.sub.results <- matrix(NA, nrow = n.sims,
