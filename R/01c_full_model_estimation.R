@@ -67,8 +67,8 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
-max.num.cliques = 60
-num.subsamples = 2 #TODO: Make this 500 again
+max.num.cliques = 35
+num.subsamples = 20 #TODO: Make this 500 again
 max.iter.estimate = 3
 d.yz.min = 1
 
@@ -103,9 +103,11 @@ time.1 <- Sys.time()
 for(scale.idx in seq(length(scale.set))){
 
   scale <- scale.set[scale.idx]
-  n <- round(5000*scale)
 
-  n.centers <- round(100*sqrt(scale))
+  # TODO: replace back the factor of 1/2
+  n <- round((3/4)*5000*scale)
+  n.centers <- round((3/4)*100*sqrt(scale))
+
   ell = round(8 + 4*log2(scale)) # min clique-size
   approximate.variance <- sim.avg.variance
 
@@ -262,13 +264,13 @@ for(scale.idx in seq(length(scale.set))){
 
 file.kappa.ests <- paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
 # file.sl.kappa.ests <- paste0("results/sl_estimates_kappa_",kappa,"_block_",block,".csv")
-# file.p.vals <- paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
+file.p.vals <- paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
 # file.norm.p.vals <- paste0("results/norm_p_vals_kappa_",kappa,"_block_",block,".csv")
 file.p.vals.sub <- paste0("results/p_vals_subsample_kappa_",kappa,"_block_",block,".csv")
 
 write.csv(kappa.ests.results, file = file.kappa.ests)
 # write.csv(sl.kappa.est.results, file = file.sl.kappa.ests)
-# write.csv(p.val.results, file = file.p.vals)
+write.csv(p.val.results, file = file.p.vals)
 # write.csv(normalized.p.val.results, file = file.norm.p.vals)
 write.csv(p.val.sub.results, file = file.p.vals.sub)
 time.2 <- Sys.time()
