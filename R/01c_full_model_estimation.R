@@ -29,12 +29,12 @@ if(slurm_arrayid == ""){
 set.seed(id)
 
 # Partitioning the simulations for running on the cluster
-kappa.idx <- floor(id/20) + 1
-block <-  id %% 20
+kappa.idx <- floor(id/100) + 1
+block <-  id %% 100
 if(block == 0){
-  block = 20
+  block = 100
 }
-n.sims = 2 #TODO: Make this 10 again
+n.sims = 2
 sim.idx <- 1:n.sims
 
 
@@ -52,7 +52,7 @@ if(kappa < 0){
 centers.variance = 0.5**2
 
 # scale parameter for the size of the network
-scale.set <- c(1/sqrt(2),1,2,4)
+scale.set <- c(1/sqrt(2),1,2) #c(1/sqrt(2),1,2,4) #corresponds to ell = 6,8,12
 
 # parameters for the distribution of the latent traits
 mu = -3
@@ -64,11 +64,13 @@ p = 3 # Latent Dimension of the data
 
 # Method Tuning Parameters
 num.midpoints = 3
-tri.const = 1.2
+tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
 max.num.cliques = 60
 num.subsamples = 2 #TODO: Make this 500 again
+max.iter.estimate = 3
+d.yz.min = 1
 
 # Recorded simulated graph statistics
 graph.stat.names <- c("Graph size",
@@ -84,11 +86,11 @@ graph.stat.names <- c("Graph size",
 # matrix arrays for storing results
 kappa.ests.results <- matrix(NA,nrow = n.sims*length(tri.const.seq),
                              ncol = length(scale.set) + 1)
-sl.kappa.est.results <- matrix(NA,nrow = n.sims,
-                               ncol = length(scale.set) + 1)
-p.val.results <- matrix(NA, nrow = n.sims*length(tri.const.seq),
-                        ncol = length(scale.set) + 1)
-normalized.p.val.results <- p.val.results
+# sl.kappa.est.results <- matrix(NA,nrow = n.sims,
+#                                ncol = length(scale.set) + 1)
+# p.val.results <- matrix(NA, nrow = n.sims*length(tri.const.seq),
+#                         ncol = length(scale.set) + 1)
+# normalized.p.val.results <- p.val.results
 
 p.val.sub.results <- matrix(NA, nrow = n.sims,
                             ncol = length(scale.set))
@@ -108,12 +110,9 @@ for(scale.idx in seq(length(scale.set))){
   approximate.variance <- sim.avg.variance
 
 
-  d.yz.min = 1.5
-  #TODO: Change back
-  if(ell < 18){
-    d.yz.min = 1
-  }
-  #d.yz.max = -log(10/ell^2)
+
+
+  #Rule of thumb for d.yz.max
   d.yz.max = max(log(ell),log(ell^2/10))
 
   graph.stats <- matrix(NA, nrow = n.sims, ncol = length(graph.stat.names))
@@ -188,7 +187,7 @@ for(scale.idx in seq(length(scale.set))){
       clique.set <- clique.set[1:max.num.cliques]
     }
 
-    D.hat <- lolaR::EstimateD(A.sim, clique.set)
+    D.hat <- lolaR::EstimateD(A.sim, clique.set, max.iter = max.iter.estimate)
 
     # Select the reference set
     reference.set <- lolaR::selectReference(D.hat,
