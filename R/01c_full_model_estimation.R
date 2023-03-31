@@ -28,12 +28,12 @@ if(slurm_arrayid == ""){
 set.seed(id)
 
 # Partitioning the simulations for running on the cluster
-kappa.idx <- floor(id/100) + 1
-block <-  id %% 100
+kappa.idx <- floor(id/20) + 1
+block <-  id %% 20
 if(block == 0){
-  block = 100
+  block = 20
 }
-n.sims = 2
+n.sims = 10
 sim.idx <- 1:n.sims
 
 
@@ -67,7 +67,7 @@ tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 res = 1 # Used as a tuning parameter for the approximate clique search
 max.num.cliques = 35
-num.subsamples = 25 #TODO: Make this 500 again
+num.subsamples = 250 #TODO: Make this 500 again
 max.iter.estimate = 3
 d.yz.min = 1
 
