@@ -9,10 +9,10 @@ rm(list = ls())
 
 library(lolaR)
 source("R/00_functions.R")
-#source("R/clique_finder.R")
-#source("R/SubsampleConstantCurvatureTest.R")
-#rm(optimal_midpoint_search) #TODO: Remove this from 00_functions.R File
 
+#whether to write the files
+write.files = T
+write.graph.stats.files = T
 
 ### If Running on a cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
@@ -65,9 +65,8 @@ p = 3 # Latent Dimension of the data
 num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
-res = 1 # Used as a tuning parameter for the approximate clique search
 max.num.cliques = 35
-num.subsamples = 250 #TODO: Make this 500 again
+num.subsamples = 250
 max.iter.estimate = 3
 d.yz.min = 1
 
@@ -256,22 +255,29 @@ for(scale.idx in seq(length(scale.set))){
       #normalized.p.val.results[res.idx,length(scale.set) + 1] = tri.const.tmp
     }
   }
-  #If tracking the graph statistics, uncomment.
-  #file.graph.stats <- paste0("results/graph_stats_kappa_",kappa,"_scale_",round(scale,1),"_block_",block,".csv")
-  #write.csv(graph.stats, file = file.graph.stats)
+  #If tracking the graph statistics
+  if(write.graph.stats.files){
+    file.graph.stats <- paste0("results/graph_stats_kappa_",kappa,"_scale_",round(scale,1),"_block_",block,".csv")
+    write.csv(graph.stats, file = file.graph.stats)
+  }
+
 }
 
-file.kappa.ests <- paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
-# file.sl.kappa.ests <- paste0("results/sl_estimates_kappa_",kappa,"_block_",block,".csv")
-file.p.vals <- paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
-# file.norm.p.vals <- paste0("results/norm_p_vals_kappa_",kappa,"_block_",block,".csv")
-file.p.vals.sub <- paste0("results/p_vals_subsample_kappa_",kappa,"_block_",block,".csv")
+if(write.files){
+  file.kappa.ests <- paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
+  # file.sl.kappa.ests <- paste0("results/sl_estimates_kappa_",kappa,"_block_",block,".csv")
+  file.p.vals <- paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
+  # file.norm.p.vals <- paste0("results/norm_p_vals_kappa_",kappa,"_block_",block,".csv")
+  file.p.vals.sub <- paste0("results/p_vals_subsample_kappa_",kappa,"_block_",block,".csv")
 
-write.csv(kappa.ests.results, file = file.kappa.ests)
-# write.csv(sl.kappa.est.results, file = file.sl.kappa.ests)
-write.csv(p.val.results, file = file.p.vals)
-# write.csv(normalized.p.val.results, file = file.norm.p.vals)
-write.csv(p.val.sub.results, file = file.p.vals.sub)
+  write.csv(kappa.ests.results, file = file.kappa.ests)
+  # write.csv(sl.kappa.est.results, file = file.sl.kappa.ests)
+  write.csv(p.val.results, file = file.p.vals)
+  # write.csv(normalized.p.val.results, file = file.norm.p.vals)
+  write.csv(p.val.sub.results, file = file.p.vals.sub)
+}
+
+
 time.2 <- Sys.time()
 
 print(paste("Time Difference:", round(time.2 - time.1,3)))
