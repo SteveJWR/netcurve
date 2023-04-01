@@ -8,6 +8,5 @@
 #SBATCH -o myscript_%j.out            # File to which STDOUT will be written
 #SBATCH -e myscript_%j.err            # File to which STDERR will be written
 #SBATCH --mail-type=ALL              # Type of email notification- NONE,BEGIN,END,FAIL,ALL
-#SBATCH --mail-user=stevewr@uw.edu # Email to which notifications will be sent
-module load R/4.0.0-foss-2020a
-Rscript 03a_power_simulations_adjacent_sphere.R
+#SBATCH --mail-user=stevewr@uw.edu # Email to which notifications will be sen
+Rscript R/03a_power_simulations_adjacent_sphere.R
