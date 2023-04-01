@@ -21,7 +21,7 @@ if(slurm_arrayid == ""){
 }
 
 set.seed(id)
-n.sims = 2 #TODO: Return this back to 10
+n.sims = 1 #TODO: Return this back to 10
 
 sim.idx <- 1:n.sims
 

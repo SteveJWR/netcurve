@@ -19,7 +19,7 @@ if(slurm_arrayid == ""){
 }
 
 set.seed(id)
-n.sims = 2 #TODO: Return this back to 10
+n.sims = 1 #TODO: Return this back to 10
 
 # Simulation Parameters
 # probability of ending up on which side of the adjacent spheres
