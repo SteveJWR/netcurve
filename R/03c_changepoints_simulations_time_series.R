@@ -9,7 +9,7 @@ source("R/00_functions.R")
 library(robseg) # robust segmentation package for changepoints
 
 #whether to write the files
-write.files = F #TODO: turn this back to true
+write.files = T
 plot.cpt = F
 
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
@@ -23,7 +23,7 @@ if(slurm_arrayid == ""){
 
 set.seed(id)
 
-n.sims = 1 #TODO: Return this back to 10
+n.sims = 2
 
 # Simulation Parameters
 mu = -3
@@ -57,7 +57,7 @@ tri.const = 1.5 # constant for the filtering term
 tri.const = 1.5
 max.num.cliques.per.time = 18 # number in each view.
 min.num.cliques.per.time = 6
-num.subsamples = 3 #TODO: Make this 250 again
+#num.subsamples = 250
 max.iter.estimate = 3
 d.yz.min = 1
 
