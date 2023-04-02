@@ -3,7 +3,7 @@
 #SBATCH --partition short             # Slurm partition to use
 #SBATCH --ntasks 1                  # Number of tasks to run. By default, one CPU core will be allocated per task
 #SBATCH --time 0-12:00                # Wall time limit in D-HH:MM
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=3600            # Memory limit for each tasks (in MB)
 #SBATCH -o myscript_%j.out            # File to which STDOUT will be written
 #SBATCH -e myscript_%j.err            # File to which STDERR will be written

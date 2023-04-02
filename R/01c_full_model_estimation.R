@@ -25,7 +25,12 @@ if(slurm_arrayid == ""){
 }
 #Setting seed for reproducibility, but having a different
 #seed for parallel branches
-set.seed(id)
+if(id == 15){
+  set.seed(-id)
+} else{
+  set.seed(id)
+}
+
 
 # Partitioning the simulations for running on the cluster
 kappa.idx <- floor(id/20) + 1
