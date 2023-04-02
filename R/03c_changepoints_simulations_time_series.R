@@ -9,8 +9,8 @@ source("R/00_functions.R")
 library(robseg) # robust segmentation package for changepoints
 
 #whether to write the files
-write.files = T
-plot.cpt = F
+write.files = F #TODO: Swap These
+plot.cpt = T
 
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 print(Sys.getenv('SLURM_ARRAY_TASK_ID'))
@@ -62,8 +62,8 @@ max.iter.estimate = 3
 d.yz.min = 1
 
 # Changepoint method parameters
-curve.scale = 10
-change.reg = 1.5
+#curve.scale = 10
+change.reg = 10
 
 # the problem is that this seems to be a hard geometry to search for cliques
 #mu <- -4  # mu for spherical ish geometry
@@ -169,7 +169,7 @@ for(scale.idx in seq(length(scale.set))){
                           lambda = change.reg*est.sd*log(length(y.clean)),
                           lthreshold=3)
     y.hat.smt <- res.l1$smt
-    loss <- mean((y.true.clean - y.hat.smt)^2)
+    loss <- median(abs(y.true.clean - y.hat.smt))
     results[sim,scale.idx] = loss
 
     if(plot.cpt){
