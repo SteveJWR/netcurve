@@ -19,7 +19,7 @@ if(slurm_arrayid == ""){
 }
 
 set.seed(id)
-n.sims = 1 #TODO: Return this back to 10
+n.sims = 10
 
 # Simulation Parameters
 # probability of ending up on which side of the adjacent spheres
@@ -66,7 +66,7 @@ tri.const = 1.5 # constant for the filtering term
 num.midpoints = 3
 tri.const = 1.5
 max.num.cliques = 35
-num.subsamples = 3 #TODO: Make this 250 again
+num.subsamples = 250
 max.iter.estimate = 3
 d.yz.min = 1
 

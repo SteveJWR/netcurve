@@ -21,7 +21,7 @@ if(slurm_arrayid == ""){
 }
 
 set.seed(id)
-n.sims = 1 #TODO: Return this back to 10
+n.sims = 10
 
 sim.idx <- 1:n.sims
 
@@ -57,7 +57,7 @@ tri.const = 1.5 # constant for the filtering term
 tri.const = 1.5
 max.num.cliques.per.view = 18 # number in each view.
 min.num.cliques.per.view = 6
-num.subsamples = 3 #TODO: Make this 250 again
+num.subsamples = 250
 max.iter.estimate = 3
 d.yz.min = 1
 
