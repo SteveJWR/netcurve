@@ -9,7 +9,7 @@ source("R/00_functions.R")
 library(Matrix)
 
 #whether to write the files
-write.files = F #TODO: turn this back to true
+write.files = T
 
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 print(Sys.getenv('SLURM_ARRAY_TASK_ID'))

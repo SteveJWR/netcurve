@@ -9,8 +9,8 @@ source("R/00_functions.R")
 library(robseg) # robust segmentation package for changepoints
 
 #whether to write the files
-write.files = F #TODO: Swap These
-plot.cpt = T
+write.files = T
+plot.cpt = F
 
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 print(Sys.getenv('SLURM_ARRAY_TASK_ID'))
@@ -39,9 +39,9 @@ scale.set <- c(1/2,1/sqrt(2),1,sqrt(2),2)
 ell.set <- round(8 + 4*log2(scale.set))
 
 # Changes in the curvature
-Time.steps = 50
-t.change1 = 15
-t.change2 = 38
+Time.steps = 6 #50
+t.change1 = 2 #15
+t.change2 = 4 # 38
 
 # three curvature values
 kappa1 = 1
