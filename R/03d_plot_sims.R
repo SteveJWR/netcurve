@@ -80,7 +80,7 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
 
 
 
-tri.const.filter = 1.4
+tri.const.filter = 1.3
 plot.dat <- matrix(NA, 0,3)
 for(kappa in kappa.set){
   full.estimates <- matrix(NA, nrow = 0, ncol = 4)
@@ -129,13 +129,13 @@ plt <- ggplot(data = plot.summary.data, aes(x = CliqueSize, y = med, color = Cur
 
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/GMM_consistancy.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/GMM_consistency.eps", width = fig.width, height = fig.height, res = fig.res)
 }
 
 
 
 
-# png(filename = "plots/GMM_consistancy.png",
+# png(filename = "plots/GMM_consistency.png",
 #     width = png.width, height = png.height, res = png.res)
 #
 #
@@ -154,7 +154,7 @@ kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 ell.set <- c(6,8,12)#c(6,8,12,16)
 
 p.val.plot.dat <- matrix(NA, 0,3)
-tri.const.filter <- 1.4
+tri.const.filter <- 1.3
 for(tri.const.filter in seq(1,2, length.out = 21)) {
   p.val.plot.dat <- matrix(NA, 0,3)
   for(kappa in kappa.set){
@@ -261,7 +261,6 @@ p.val.plot.summary.data <- p.val.plot.dat %>% group_by(CliqueSize, Curvature) %>
             var.fpr01  = (1/(sum(pval >= 0.0, na.rm = T)))*mean(pval < 0.01, na.rm = T)*(1 - mean(pval < 0.01, na.rm = T)),
             var.fpr005  = (1/(sum(pval >= 0.0, na.rm = T)))*mean(pval < 0.005, na.rm = T)*(1 - mean(pval < 0.005, na.rm = T)))
 
-
 ggplot(data = p.val.plot.dat,
        aes(x = CliqueSize, y = pval, color = Curvature)) +
   geom_point() +
@@ -286,12 +285,18 @@ plt <- ggplot(data = p.val.plot.summary.data,
 plot(plt)
 
 
-dev.off()
-png(filename = "plots/fpr_C1p0.png",
-    width = png.width, height = png.height, res = png.res)
-plt
-# Close the pdf file
-dev.off()
+if(save.plots){
+  plt %>%
+    ggexport(filename = "plots/GMM_fpr_cc_test.eps", width = fig.width, height = fig.height, res = fig.res)
+}
+
+
+# dev.off()
+# png(filename = "plots/fpr_C1p0.png",
+#     width = png.width, height = png.height, res = png.res)
+# plt
+# # Close the pdf file
+# dev.off()
 
 
 
@@ -314,7 +319,7 @@ ell.set <- c(6,8,12)#c(6,8,12,16)
 
 ad.sphere.p.val.full <- matrix(NA, nrow = 0, ncol = 3)
 
-tri.const.filter = 1.4
+tri.const.filter = 1.3
 for(block in 1:20){
 
   file <-  paste0("results/adjacent_spheres_results_block_",block,".csv")
@@ -345,12 +350,11 @@ plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Power)) +
 
 
 plt
-png(filename = "plots/ad_spheres_power.png",
-    width = png.width, height = png.height, res = png.res)
-plt %>%
-  ggexport(filename = "plots/theoretical_variance.eps", width = fig.width, height = fig.height, res = fig.res)
-# Close the pdf file
-dev.off()
+
+if(save.plots){
+  plt %>%
+    ggexport(filename = "plots/ad_spheres_power.eps", width = fig.width, height = fig.height, res = fig.res)
+}
 
 
 #### Multiview Spheres Power #####
@@ -399,8 +403,11 @@ png(filename = "plots/multiview_power.png",
 
 plt
 
-# Close the pdf file
-dev.off()
+if(save.plots){
+  plt %>%
+    ggexport(filename = "plots/multiview_power.eps", width = fig.width, height = fig.height, res = fig.res)
+}
+
 
 
 
@@ -467,14 +474,11 @@ plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Mean_MAD), group = "Median", co
 dev.off()
 plt
 
-png(filename = "plots/Changepoint_MAD.png",
-    width = png.width, height = png.height, res = png.res)
 
-
-plt
-
-# Close the pdf file
-dev.off()
+if(save.plots){
+  plt %>%
+    ggexport(filename = "plots/changepoint_MAD.eps", width = fig.width, height = fig.height, res = fig.res)
+}
 
 
 
