@@ -50,11 +50,9 @@ kappa3 = 1.3
 
 
 # Method Tuning Parameters
-d.yz.min <- 1
-tri.const = 1.5 # constant for the filtering term
+tri.const = 1.3 # constant for the filtering term
 # Method Tuning Parameters
 #num.midpoints = 3
-tri.const = 1.5
 max.num.cliques.per.time = 18 # number in each view.
 min.num.cliques.per.time = 6
 #num.subsamples = 250
@@ -62,12 +60,13 @@ max.iter.estimate = 3
 d.yz.min = 1
 
 # Changepoint method parameters
-#curve.scale = 10
-change.reg = 10
+curve.thresh = 10
+change.reg = 2
 
 # the problem is that this seems to be a hard geometry to search for cliques
 #mu <- -4  # mu for spherical ish geometry
 results <- matrix(NA, nrow = n.sims, ncol = length(scale.set))
+results.med <- results
 colnames(results) = paste0("CliqueSize_", ell.set)
 
 time.1 <- Sys.time()
@@ -152,8 +151,8 @@ for(scale.idx in seq(length(scale.set))){
     y <- kappa.seq #scale_curvature(kappa.seq, curve.scale)
     y.true <- kappa.true.seq #scale_curvature(kappa.true.seq, curve.scale)
 
-    y[y > 1000] = 1000
-    y[y < -1000] = -1000
+    y[y > curve.thresh] = curve.thresh
+    y[y < -curve.thresh] = -curve.thresh
 
     idx.clean <- !is.na(y)
 
@@ -169,8 +168,10 @@ for(scale.idx in seq(length(scale.set))){
                           lambda = change.reg*est.sd*log(length(y.clean)),
                           lthreshold=3)
     y.hat.smt <- res.l1$smt
-    loss <- median(abs(y.true.clean - y.hat.smt))
+    loss <- mean(abs(y.true.clean - y.hat.smt))
+    loss.med <- median(abs(y.true.clean - y.hat.smt))
     results[sim,scale.idx] = loss
+    results.med[sim,scale.idx] = loss.med
 
     if(plot.cpt){
       plot(y.true.clean, ylim = c(-5,5))
@@ -184,6 +185,8 @@ for(scale.idx in seq(length(scale.set))){
 if(write.files){
   csv.file <-  paste0("results/changepoint_results","_block_",id,".csv")
   write.csv(results, file = csv.file)
+  csv.file <-  paste0("results/changepoint_results_median","_block_",id,".csv")
+  write.csv(results.med, file = csv.file)
 }
 
 
