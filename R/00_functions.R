@@ -73,33 +73,62 @@ d_xm <- function(kappa,dxy,dxz,dyz){
 
 
 # derivative of the estimating function.
-g_grad_kappa <- function(kappa,dxy,dxz,dyz,dxm){
+g_grad_kappa <- function(kappa,dxy,dxz,dyz,dxm, manual.grad = F, eps = 10**(-9)){
 
   # log-scale computing for small kappa
-  if(kappa != 0){
-    gp = (-1)*(1/(4*kappa^2))*(8*cos(dxm*sqrt(kappa + 0i)) - 4*cos(dxz*sqrt(kappa + 0i))*sec((dyz*sqrt(kappa + 0i))/2) +
-                                 4*dxm*sqrt(kappa + 0i)*sin(dxm*sqrt(kappa + 0i)) - 2*dxy*sqrt(kappa + 0i)*sec((dyz*sqrt(kappa + 0i))/2)*sin(dxy*sqrt(kappa + 0i)) -
-                                 2*dxz*sqrt(kappa + 0i)*sec((dyz*sqrt(kappa + 0i))/2)*sin(dxz*sqrt(kappa + 0i)) +
-                                 dyz*sqrt(kappa + 0i)*cos(dxz*sqrt(kappa + 0i))*sec((dyz*sqrt(kappa + 0i))/2)*tan((dyz*sqrt(kappa + 0i))/2) +
-                                 cos(dxy*sqrt(kappa + 0i))*sec(dyz*sqrt(kappa + 0i)/2)*(-4 + dyz*sqrt(kappa + 0i)*tan(dyz*sqrt(kappa + 0i)/2)))
-    gp = Re(gp)
-  } else if(kappa == 0){
-    gp = (-1)*(1/192)*(-16*dxm^4 + 8*dxy^4 + 8*dxz^4 - 12*dxy^2*dyz^2 - 12*dxz^2*dyz^2 + 5*dyz^4)
+  if(manual.grad){
+    gp = (lolaR::gEF(kappa + eps,dxy,dxz,dyz,dxm) - lolaR::gEF(kappa + eps,dxy,dxz,dyz,dxm))/eps
+  } else{
+    if(kappa != 0){
+      gp = (-1)*(1/(4*kappa^2))*(8*cos(dxm*sqrt(kappa + 0i)) - 4*cos(dxz*sqrt(kappa + 0i))*sec((dyz*sqrt(kappa + 0i))/2) +
+                                   4*dxm*sqrt(kappa + 0i)*sin(dxm*sqrt(kappa + 0i)) - 2*dxy*sqrt(kappa + 0i)*sec((dyz*sqrt(kappa + 0i))/2)*sin(dxy*sqrt(kappa + 0i)) -
+                                   2*dxz*sqrt(kappa + 0i)*sec((dyz*sqrt(kappa + 0i))/2)*sin(dxz*sqrt(kappa + 0i)) +
+                                   dyz*sqrt(kappa + 0i)*cos(dxz*sqrt(kappa + 0i))*sec((dyz*sqrt(kappa + 0i))/2)*tan((dyz*sqrt(kappa + 0i))/2) +
+                                   cos(dxy*sqrt(kappa + 0i))*sec(dyz*sqrt(kappa + 0i)/2)*(-4 + dyz*sqrt(kappa + 0i)*tan(dyz*sqrt(kappa + 0i)/2)))
+      gp = Re(gp)
+    } else if(kappa == 0){
+      gp = (-1)*(1/192)*(-16*dxm^4 + 8*dxy^4 + 8*dxz^4 - 12*dxy^2*dyz^2 - 12*dxz^2*dyz^2 + 5*dyz^4)
+    }
   }
   return(gp)
 }
 
 # gradient with respect to d
-g_grad_d <- function(kappa, dxy, dxz, dyz, dxm){
-  g1 <- (-1/(sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*sin(dxy/2*sqrt(kappa + 0i))
-  g2 <- (-1/(sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*sin(dxz/2*sqrt(kappa + 0i))
-  g3 <- (1/(2*sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*tan(dyz/2*sqrt(kappa + 0i))*(cos(dxy*sqrt(kappa + 0i)) + cos(dxz*sqrt(kappa + 0i)))
-  g4 <- (2/(sqrt(kappa + 0i)))*sin(dxm*sqrt(kappa + 0i))
-  g.vec <- c(g1,g2,g3,g4)
+g_grad_d <- function(kappa, dxy, dxz, dyz, dxm, manual.negative = F, eps = 10**(-8)){
+  if(kappa > 0){
+    g1 <- (1/(sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*sin(dxy*sqrt(kappa + 0i))
+    g2 <- (1/(sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*sin(dxz*sqrt(kappa + 0i))
+    g3 <- (1/(2*sqrt(kappa + 0i)))*sec(dyz/2*sqrt(kappa + 0i))*tan(dyz/2*sqrt(kappa + 0i))*(cos(dxy*sqrt(kappa + 0i)) + cos(dxz*sqrt(kappa + 0i)))
+    g4 <- -(2/(sqrt(kappa + 0i)))*sin(dxm*sqrt(kappa + 0i))
+    g.vec <- c(g1,g2,g3,g4)
+  }
+  else if(kappa == 0){
+    g1 <- dxy + 0i
+    g2 <- dxz + 0i
+    g3 <- dyz/2 + 0i
+    g4 <- -2*dxm + 0i
+    g.vec <- c(g1,g2,g3,g4)
+  } else {
+    g1 <- (1/(sqrt( -kappa + 0i)))*sech(dyz/2*sqrt(-kappa + 0i))*sinh(dxy*sqrt(-kappa + 0i))
+    g2 <- (1/(sqrt(-kappa + 0i)))*sech(dyz/2*sqrt(-kappa + 0i))*sinh(dxz*sqrt(-kappa + 0i))
+    g3 <- -(1/(2*sqrt(-kappa + 0i)))*sech(dyz/2*sqrt(-kappa + 0i))*tanh(dyz/2*sqrt(-kappa + 0i))*(cosh(dxy*sqrt(-kappa + 0i)) + cosh(dxz*sqrt(-kappa + 0i)))
+    g4 <- (2/(sqrt(-kappa + 0i)))*sinh(dxm*sqrt(-kappa + 0i))
+
+    if(manual.negative){
+      g1 <- (lolaR::gEF(kappa, dxy + eps, dxz, dyz, dxm) - lolaR::gEF(kappa, dxy, dxz, dyz, dxm))/eps
+      g2 <- (lolaR::gEF(kappa, dxy, dxz + eps, dyz, dxm) - lolaR::gEF(kappa, dxy, dxz, dyz, dxm))/eps
+      g3 <- (lolaR::gEF(kappa, dxy, dxz, dyz + eps, dxm) - lolaR::gEF(kappa, dxy, dxz, dyz, dxm))/eps
+      g4 <- (lolaR::gEF(kappa, dxy, dxz, dyz, dxm + eps) - lolaR::gEF(kappa, dxy, dxz, dyz, dxm))/eps
+    }
+
+    g.vec <- c(g1,g2,g3,g4)
+  }
   return(g.vec)
 }
 
-
+sech <- function(x){
+  1/cosh(x)
+}
 
 #Upper bound on curvature Estimate
 # g_u <- function(kappa, dxy, dxz, dyz, dxm, dym, dzm){

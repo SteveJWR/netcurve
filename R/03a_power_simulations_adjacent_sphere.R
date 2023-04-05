@@ -18,7 +18,12 @@ if(slurm_arrayid == ""){
   id <- as.numeric(slurm_arrayid)
 }
 
-set.seed(id)
+
+if(id %in% c(1,2,15)){
+  set.seed(-id)
+} else {
+  set.seed(id)
+}
 n.sims = 10
 
 # Simulation Parameters
