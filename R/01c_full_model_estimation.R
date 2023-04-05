@@ -38,7 +38,7 @@ block <-  id %% 20
 if(block == 0){
   block = 20
 }
-n.sims = 5
+n.sims = 10
 sim.idx <- 1:n.sims
 
 
@@ -71,7 +71,7 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
-num.subsamples = 750
+num.subsamples = 250
 max.iter.estimate = 6
 d.yz.min = 1
 
