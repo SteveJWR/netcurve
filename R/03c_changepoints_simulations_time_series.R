@@ -118,7 +118,6 @@ for(scale.idx in seq(length(scale.set))){
 
       Dt <- pos_to_dist(lpcm_T$Z.set[[time]], kappa.t)
 
-
       At <- sim_ls_network_fast_2(nu.vec,lpcm_T$Z.set[[time]], kappa.t)
 
       clique.set.t <- guided_clique_set(At,lpcm_T$cluster_labels,

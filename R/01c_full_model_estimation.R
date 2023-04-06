@@ -31,21 +31,22 @@ if(id == 15){
   set.seed(id)
 }
 
+# Simulation Parameters
+# Values of kappa to iterate
+kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 
 # Partitioning the simulations for running on the cluster
-kappa.idx <- floor(id/20) + 1
-block <-  id %% 20
-if(block == 0){
-  block = 20
-}
+
+block <-  floor((id - 1)/length(kappa.set)) +1
+kappa.idx <- (id - 1) %% length(kappa.set) + 1
+
+
 n.sims = 10
 sim.idx <- 1:n.sims
 
 
 
-# Simulation Parameters
-# Values of kappa to iterate
-kappa.set <- c(-2,-1,-0.5,0,0.5,1)
+
 kappa = kappa.set[kappa.idx]
 # Radius of the latent GMM
 if(kappa < 0){
