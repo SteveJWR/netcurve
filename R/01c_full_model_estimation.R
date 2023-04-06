@@ -31,6 +31,11 @@ if(id == 15){
   set.seed(id)
 }
 
+# strange seed with euclidean sims
+if(id %% 6 == 3){
+  set.seed(-id)
+}
+
 # Simulation Parameters
 # Values of kappa to iterate
 kappa.set <- c(-2,-1,-0.5,0,0.5,1)
@@ -72,7 +77,7 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
-num.subsamples = 250
+num.subsamples = 300
 max.iter.estimate = 6
 d.yz.min = 1
 
