@@ -151,8 +151,8 @@ for(scale.idx in seq(length(scale.set))){
     }
 
     kappa.seq <- as.numeric(kappa.seq)
-    y <- kappa.med.seq #scale_curvature(kappa.seq, curve.scale)
-    y.true <- kappa.med.true.seq #scale_curvature(kappa.true.seq, curve.scale)
+    y <- scale_curvature(kappa.med.seq, curve.thresh) #scale_curvature(kappa.seq, curve.thresh)
+    y.true <- scale_curvature(kappa.med.true.seq, curve.thresh) #scale_curvature(kappa.true.seq, curve.thresh)
 
     #y[y > curve.thresh] = curve.thresh
     #y[y < -curve.thresh] = -curve.thresh
