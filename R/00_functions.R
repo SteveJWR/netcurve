@@ -4336,10 +4336,11 @@ plot_cliques <- function(G,clique.set){
 }
 
 
-plot_cliques_curvature <- function(G,estimates,clique.set, num.midpoints = 3, tri.const = 1.4){
 
-  D <- estimates$D
-  mid.search <- estimates$midpoints
+plot_cliques_curvature <- function(G,D,mid.set,clique.set, num.midpoints = 3, tri.const = 1.4){
+
+  #D <- estimates$D
+  #mid.set <- estimates$midpoints
   K = nrow(D)
 
 
@@ -4348,20 +4349,23 @@ plot_cliques_curvature <- function(G,estimates,clique.set, num.midpoints = 3, tr
   z.set <- c()
   kappas <- c()
   for(k in seq(num.midpoints)){
-    y.opt = mid.search[k,1]
-    z.opt = mid.search[k,2]
-    m.opt = mid.search[k,3]
+    y.opt = mid.set[k,1]
+    z.opt = mid.set[k,2]
+    m.opt = mid.set[k,3]
     m.set[k] <- m.opt
     y.set[k] <- y.opt
     z.set[k] <- z.opt
     # x.set <- filter_indices(D.hat, y.opt,
     #                         z.opt,m.opt,
     #                         c1 = c1,c2 = c2,c3 = c3)
-    x.set<- filter_indices_2(D, y.opt,
-                             z.opt,m.opt,
-                             tri.const = tri.const)
+    x.set<- lolaR::filter_indices(D, y.opt,
+                                  z.opt, m.opt,
+                                  tri.const = tri.const)
+      #filter_indices_2(D, y.opt,
+            #                 z.opt,m.opt,
+            #                 tri.const = tri.const)
 
-    kappa.set <- estimate_kappa_set(D,y.opt,z.opt,m.opt,x.set)
+    kappa.set <- lolaR::EstimateKappaSet(D,y.opt,z.opt,m.opt,x.set)
     kappas[k] <- median(kappa.set, na.rm = T)
 
   }
@@ -4370,6 +4374,7 @@ plot_cliques_curvature <- function(G,estimates,clique.set, num.midpoints = 3, tr
 
   kappas <- round(kappas,4)
 
+  # maximum for plotting
   max.curve = 10
   kappas[kappas < -max.curve] = -max.curve
   kappas[kappas > max.curve] = max.curve
@@ -4453,23 +4458,7 @@ plot_cliques_curvature <- function(G,estimates,clique.set, num.midpoints = 3, tr
   return(plt)
 }
 
-# clique_set_connected_subgraph <- function(G, clique.set){
-#   K <- length(clique.set)
-#   A.sub <- matrix(0,K,K)
-#
-#   for(k1 in seq(K)){
-#     for(k2 in seq(K)){
-#       A.sub[k1,k2] = 1*(sum(G[as.numeric(clique.set[[k1]]),as.numeric(clique.set[[k2]])]) > 0 )
-#     }
-#   }
-#   g.sub <- igraph::graph_from_adjacency_matrix(A.sub, mode = "undirected")
-#   connected.subgraph <- components(g.sub, mode = "strong")
-#   clust.idx <- which.max(table(connected.subgraph$membership))
-#   connect.idx <- which(connected.subgraph$membership == clust.idx)
-#
-#   clique.subset <- clique.set[connect.idx]
-#   return(clique.subset)
-# }
+
 
 
 # heavy_tail_transformation <- function(x){

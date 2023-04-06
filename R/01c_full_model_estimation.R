@@ -37,7 +37,7 @@ kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 
 # Partitioning the simulations for running on the cluster
 
-block <-  floor((id - 1)/length(kappa.set)) +1
+block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 

@@ -106,6 +106,8 @@ for(scale.idx in seq(length(scale.set))){
     x <- c()
     kappa.seq <- c()
     kappa.true.seq <- c()
+    kappa.med.seq <- c()
+    kappa.med.true.seq <- c()
     for(time in seq(Time.steps)){
       cat(paste0(time,"/",Time.steps), end = "\r")
       if(time < t.change1){
@@ -143,22 +145,24 @@ for(scale.idx in seq(length(scale.set))){
         kappa.seq <- c(kappa.seq, estimates.t$kappas)
         x <- c(x, rep(time, length(estimates.t$kappas)))
         kappa.true.seq <- c(kappa.true.seq, rep(kappa.t, length(estimates.t$kappas)))
+        kappa.med.seq <- c(kappa.med.seq, median(estimates.t$kappas, na.rm = T))
+        kappa.med.true.seq <- c(kappa.med.true.seq, kappa.t)
       }
     }
 
     kappa.seq <- as.numeric(kappa.seq)
-    y <- kappa.seq #scale_curvature(kappa.seq, curve.scale)
-    y.true <- kappa.true.seq #scale_curvature(kappa.true.seq, curve.scale)
+    y <- kappa.med.seq #scale_curvature(kappa.seq, curve.scale)
+    y.true <- kappa.med.true.seq #scale_curvature(kappa.true.seq, curve.scale)
 
-    y[y > curve.thresh] = curve.thresh
-    y[y < -curve.thresh] = -curve.thresh
+    #y[y > curve.thresh] = curve.thresh
+    #y[y < -curve.thresh] = -curve.thresh
 
     idx.clean <- !is.na(y)
 
     x.clean <- x[idx.clean]
     y.clean <- y[idx.clean]
     y.true.clean <- y.true[idx.clean]
-    dat <- data.frame("x" = x, "y" = y)
+    dat <- data.frame("x" = seq(length(y)), "y" = y)
 
     est.sd <- mad(diff(y.clean)/sqrt(2))
     ## run dynamic programming
