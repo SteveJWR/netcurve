@@ -34,8 +34,9 @@ if(id == 15){
 
 # strange seed with euclidean sims
 if(id %% 6 == 3){
-  set.seed(-id)
+  set.seed(id)
 }
+
 
 # Simulation Parameters
 # Values of kappa to iterate
