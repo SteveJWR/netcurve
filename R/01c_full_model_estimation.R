@@ -47,7 +47,7 @@ block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 
-n.sims = 10 #TODO: change this back to 10
+n.sims = 10
 sim.idx <- 1:n.sims
 
 
