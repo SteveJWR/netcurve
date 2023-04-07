@@ -33,8 +33,8 @@ if(id == 15){
 }
 
 # strange seed with euclidean sims
-if(id %% 6 == 3){
-  set.seed(id)
+if(id %% 6 == 4){
+  set.seed(-id)
 }
 
 
