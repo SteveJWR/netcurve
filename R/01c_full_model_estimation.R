@@ -11,7 +11,8 @@ library(lolaR)
 source("R/00_functions.R")
 
 #whether to write the files
-write.files = T
+write.estimates.files = F
+write.p.val.files = T
 write.graph.stats.files = T
 
 ### If Running on a cluster
@@ -38,7 +39,7 @@ if(id %% 6 == 3){
 
 # Simulation Parameters
 # Values of kappa to iterate
-kappa.set <- c(-2,-1,-0.5,0,0.5,1)
+kappa.set <- c(-2,-1,-0.5,0.001,0.5,1)
 
 # Partitioning the simulations for running on the cluster
 
@@ -46,7 +47,7 @@ block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 
-n.sims = 10
+n.sims = 10 #TODO: change this back to 10
 sim.idx <- 1:n.sims
 
 
@@ -77,8 +78,8 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
-num.subsamples = 300
-max.iter.estimate = 6
+num.subsamples = 200
+max.iter.estimate = 1 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
 
 # Recorded simulated graph statistics
@@ -130,7 +131,7 @@ for(scale.idx in seq(length(scale.set))){
   colnames(graph.stats) <- graph.stat.names
 
 
-
+  sim.idx = seq(5,n.sims)
   for(sim in sim.idx){
 
     print(paste("Simulation:", sim, "/",n.sims))
@@ -273,15 +274,31 @@ for(scale.idx in seq(length(scale.set))){
   }
 
 }
+if(round(kappa) == 0){
+  kappa = 0
+}
 
-if(write.files){
+if(write.estimates.files){
   file.kappa.ests <- paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
+  # file.sl.kappa.ests <- paste0("results/sl_estimates_kappa_",kappa,"_block_",block,".csv")
+
+  # file.norm.p.vals <- paste0("results/norm_p_vals_kappa_",kappa,"_block_",block,".csv")
+
+
+  write.csv(kappa.ests.results, file = file.kappa.ests)
+  # write.csv(sl.kappa.est.results, file = file.sl.kappa.ests)
+
+  # write.csv(normalized.p.val.results, file = file.norm.p.vals)
+}
+
+if(write.p.val.files){
+  #file.kappa.ests <- paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
   # file.sl.kappa.ests <- paste0("results/sl_estimates_kappa_",kappa,"_block_",block,".csv")
   file.p.vals <- paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
   # file.norm.p.vals <- paste0("results/norm_p_vals_kappa_",kappa,"_block_",block,".csv")
   file.p.vals.sub <- paste0("results/p_vals_subsample_kappa_",kappa,"_block_",block,".csv")
 
-  write.csv(kappa.ests.results, file = file.kappa.ests)
+  #write.csv(kappa.ests.results, file = file.kappa.ests)
   # write.csv(sl.kappa.est.results, file = file.sl.kappa.ests)
   write.csv(p.val.results, file = file.p.vals)
   # write.csv(normalized.p.val.results, file = file.norm.p.vals)
