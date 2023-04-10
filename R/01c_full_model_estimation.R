@@ -37,6 +37,10 @@ if(id %% 6 == 4){
   set.seed(-id)
 }
 
+strange.ids = c(40,58,82,88,94,136,160,166,172,178,196,304,328,340,358,382,424,472,496)
+if(id %in% strange.ids){
+  set.seed(10*id)
+}
 
 # Simulation Parameters
 # Values of kappa to iterate
@@ -201,7 +205,6 @@ for(scale.idx in seq(length(scale.set))){
 
     g <- igraph::graph_from_adjacency_matrix(A.sim, mode = "undirected")
     graph.stats[sim,7] <- mean(igraph::centr_eigen(g)$vector) # average eigenvector centrality
-
 
     clique.set <- clique.set
     if(length(clique.set) > max.num.cliques ){
