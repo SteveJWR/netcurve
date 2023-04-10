@@ -463,38 +463,71 @@ sech <- function(x){
 # }
 
 #simulate latent space positions.
-sim_latent_pos <- function(sigma,p,kappa, n){
-  if(kappa == 0){
-    Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p)))
-  } else if (kappa < 0){
-    Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p)))
-    Z.0 = apply(Z, 1, function(z){
-      out = sum(z^2) + 1
-    })
-    Z = cbind(sqrt(Z.0),Z)
-  } else if (kappa > 0){ #ends up being uniform in this parameterization
-    Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p + 1)))
-    Z.norm = apply(Z, 1, function(z){
-      out = sum(z^2)
-    })
-    # should we or should we not embed in a literally larger sphere
-    #Z = (1/sqrt(kappa))*Z/sqrt(Z.norm)
-    Z = Z/sqrt(Z.norm)
+# flatness compresses the isotropic map into a approximately a 2d disk
+sim_latent_pos <- function(sigma,p,kappa, n, flatness = 1){
+  if(p > 2){
+    if(kappa == 0){
+      sigma.flat = c(rep(flatness,2)*sigma,rep(sigma, p - 2))
+      Z = mvtnorm::rmvnorm(n, sigma = sigma.flat)
+    } else if (kappa < 0){
+      sigma.flat = c(rep(flatness,2)*sigma,rep(sigma, p - 2))
+      Z = mvtnorm::rmvnorm(n, sigma = sigma.flat)
+      Z.0 = apply(Z, 1, function(z){
+        out = sum(z^2) + 1
+      })
+      Z = cbind(sqrt(Z.0),Z)
+    } else if (kappa > 0){ #ends up being uniform in this parameterization
+      sigma.flat = c(rep(flatness,2)*sigma,rep(sigma, p - 2))
+      Z = mvtnorm::rmvnorm(n, sigma = sigma.flat)
+      Z.norm = apply(Z, 1, function(z){
+        out = sum(z^2)
+      })
+      # should we or should we not embed in a literally larger sphere
+      #Z = (1/sqrt(kappa))*Z/sqrt(Z.norm)
+      Z = Z/sqrt(Z.norm)
+    }
+  } else {
+    if(kappa == 0){
+      Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p)))
+    } else if (kappa < 0){
+      Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p)))
+      Z.0 = apply(Z, 1, function(z){
+        out = sum(z^2) + 1
+      })
+      Z = cbind(sqrt(Z.0),Z)
+    } else if (kappa > 0){ #ends up being uniform in this parameterization
+      Z = mvtnorm::rmvnorm(n, sigma = diag(rep(sigma, p + 1)))
+      Z.norm = apply(Z, 1, function(z){
+        out = sum(z^2)
+      })
+      # should we or should we not embed in a literally larger sphere
+      #Z = (1/sqrt(kappa))*Z/sqrt(Z.norm)
+      Z = Z/sqrt(Z.norm)
+    }
   }
+
   return(Z)
 }
 
 
 ## TODO: Correct this
 # sampling from a uniform ball in various geometries
-sim_latent_uniform_ball <- function(n,p,kappa,radius, perp = F){
+sim_latent_uniform_ball <- function(n,p,kappa,radius, flatness = 1){
   # equal angle sampler
-  if(perp){
-    X <- mvtnorm::rmvnorm(n, mean = rep(0,p-1), sigma = diag(rep(1,p -1)))
-    X <- cbind(rep(0,n),X)
-  } else {
+  # if(perp){
+  #   X <- mvtnorm::rmvnorm(n, mean = rep(0,p-1), sigma = diag(rep(1,p -1)))
+  #   X <- cbind(rep(0,n),X)
+  # } else {
+  #   X <- mvtnorm::rmvnorm(n, mean = rep(0,p), sigma = diag(rep(1,p)))
+  # }
+  sigma = 1
+  if(p > 2){
+    sigma.flat = c(rep(flatness,2)*sigma,rep(sigma, p - 2))
     X <- mvtnorm::rmvnorm(n, mean = rep(0,p), sigma = diag(rep(1,p)))
+    X <- cbind(rep(0,n),X)
   }
+
+
   X = X/sqrt(rowSums(X**2)) # direction X
   R = radial_rejection_sampler(n,p,kappa,radius)
   if(kappa == 0){
@@ -3768,28 +3801,29 @@ rmanifn <- function(n,mu,var.scale,kappa){
 
 latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
                                           variance.scales = rep(0.05,n.centers),
-                                          PI = rep(1/n.centers,n.centers)){
+                                          PI = rep(1/n.centers,n.centers), flatness = 1){
 
   cluster.sizes <- as.numeric(rmultinom(n = 1, size = n, prob = PI))
-  if(kappa >= 0){
-    centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius)
-  } else {
-    n.inner <- round(n.centers/2)
-    n.outer <- n.centers - n.inner
-    centers1 <- sim_projected_uniform_ball(n.outer,p,kappa,centers.radius)
-    # inner radius
-    inner.radius <- centers.radius/(2.5)
-    #centers2 <- sim_projected_uniform_ball(n.inner,p,kappa,inner.radius)
-    centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
-    centers <- rbind(centers1,centers2)
+  # TODO: Replace this back to the old version if it doesnt work
+  # if(kappa >= 0){
+  #   centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
+  # } else {
+  #   n.inner <- round(n.centers/2)
+  #   n.outer <- n.centers - n.inner
+  #   centers1 <- sim_projected_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
+  #   # inner radius
+  #   inner.radius <- centers.radius/(2.5)
+  #   #centers2 <- sim_projected_uniform_ball(n.inner,p,kappa,inner.radius)
+  #   centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
+  #   centers <- rbind(centers1,centers2)
+  #
+  #   ## Alternative:
+  #   centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
+  #
+  #
+  # }
 
-    ## Alternative:
-    centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius)
-
-
-  }
-
-
+  centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
 
   clust.labels <- c()
   Z <- NULL

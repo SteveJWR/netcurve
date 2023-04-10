@@ -55,6 +55,9 @@ sim.idx <- 1:n.sims
 
 
 kappa = kappa.set[kappa.idx]
+
+
+
 # Radius of the latent GMM
 if(kappa < 0){
   centers.radius = 2.5 # 2
@@ -72,7 +75,7 @@ sd = 3
 
 sim.avg.variance <- 0.25**2 # average variance the variance of the clusters of the GMM
 p = 3 # Latent Dimension of the data
-
+flatness = 1*(kappa >= 0) + 10*(kappa < 0) # flatness of the distribution
 
 # Method Tuning Parameters
 num.midpoints = 3
@@ -132,7 +135,8 @@ for(scale.idx in seq(length(scale.set))){
   colnames(graph.stats) <- graph.stat.names
 
 
-  sim.idx = seq(5,n.sims)
+
+
   for(sim in sim.idx){
 
     print(paste("Simulation:", sim, "/",n.sims))
@@ -145,7 +149,8 @@ for(scale.idx in seq(length(scale.set))){
                                           centers.radius,
                                           kappa,
                                           cluster.model.variance,
-                                          PI = PI)
+                                          PI = PI,
+                                          flatness = flatness)
     # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa,
     #                                         centers.variance =centers.variance,
     #                                         cluster.variance = approximate.variance,
@@ -174,7 +179,10 @@ for(scale.idx in seq(length(scale.set))){
       max.clique.size <- NA
     }
 
-    print(paste("Max cliques size:",max.clique.size))
+    if(get.largest.clique){
+      print(paste("Max cliques size:",max.clique.size))
+    }
+
 
     # Just search for cliques
     clique.set <- guided_clique_set(A.sim,lpcm$cluster_labels,
@@ -222,7 +230,7 @@ for(scale.idx in seq(length(scale.set))){
                                                                                  D.subsample = cc.test$`D.subs`,
                                                                                  reference.set = reference.set,
                                                                                  tri.const.seq = tri.const.seq,
-                                                                                 verbose = F)
+                                                                                 verbose = T)
 
     for(tri.const.idx in seq(length(tri.const.seq))){
 
