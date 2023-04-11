@@ -13,7 +13,7 @@ source("R/00_functions.R")
 #whether to write the files
 write.estimates.files = T
 write.p.val.files = T
-write.graph.stats.files = T
+write.graph.stats.files = F
 
 ### If Running on a cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
@@ -48,7 +48,7 @@ block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 
-n.sims = 4
+n.sims = 4  #TODO: Change this back to 4
 sim.idx <- 1:n.sims
 
 
@@ -59,15 +59,18 @@ kappa = kappa.set[kappa.idx]
 
 
 # Radius of the latent GMM
-if(kappa < 0){
-  centers.radius = 2.5 # 2
-} else {
-  centers.radius = 2.5
-}
+# if(kappa < 0){
+#   centers.radius = 2.5 # 2
+# } else {
+#   centers.radius = 2.5
+# }
+centers.radius = 3
 centers.variance = 0.5**2
 
 # scale parameter for the size of the network
 scale.set <- c(1/sqrt(2),1,2) #c(1/sqrt(2),1,2,4) #corresponds to ell = 6,8,12
+#
+
 
 # parameters for the distribution of the latent traits
 mu = -3
@@ -75,16 +78,19 @@ sd = 3
 
 sim.avg.variance <- 0.25**2 # average variance the variance of the clusters of the GMM
 p = 3 # Latent Dimension of the data
-flatness = 1*(kappa >= 0) + 25*(kappa < 0) # flatness of the distribution
+#flatness = 1*(kappa >= 0) + 25*(kappa < 0) # flatness of the distribution
 
 # Method Tuning Parameters
 num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
-num.subsamples = 200
+num.subsamples = 200  #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
+
+
+centers.set <- c(1,2,3,4,5)
 
 # Recorded simulated graph statistics
 graph.stat.names <- c("Graph size",
@@ -136,7 +142,6 @@ for(scale.idx in seq(length(scale.set))){
 
 
 
-
   for(sim in sim.idx){
 
     print(paste("Simulation:", sim, "/",n.sims))
@@ -149,8 +154,7 @@ for(scale.idx in seq(length(scale.set))){
                                           centers.radius,
                                           kappa,
                                           cluster.model.variance,
-                                          PI = PI,
-                                          flatness = flatness)
+                                          PI = PI)
     # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa,
     #                                         centers.variance =centers.variance,
     #                                         cluster.variance = approximate.variance,
@@ -282,6 +286,7 @@ for(scale.idx in seq(length(scale.set))){
   }
 
 }
+#TODO: Remove this in final version
 if(round(kappa) == 0){
   kappa = 0
 }
@@ -317,6 +322,12 @@ if(write.p.val.files){
 time.2 <- Sys.time()
 
 print(paste("Time Difference:", round(time.2 - time.1,3)))
+
+
+# filtered.kappa <- kappa.ests.results[kappa.ests.results[,6] == 1.2,]
+# filtered.kappa[filtered.kappa < -4000] = NA
+# colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+# colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
 
 
 
