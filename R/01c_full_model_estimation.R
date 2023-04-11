@@ -11,7 +11,7 @@ library(lolaR)
 source("R/00_functions.R")
 
 #whether to write the files
-write.estimates.files = F
+write.estimates.files = T
 write.p.val.files = T
 write.graph.stats.files = T
 
@@ -79,7 +79,7 @@ sd = 3
 
 sim.avg.variance <- 0.25**2 # average variance the variance of the clusters of the GMM
 p = 3 # Latent Dimension of the data
-flatness = 1*(kappa >= 0) + 10*(kappa < 0) # flatness of the distribution
+flatness = 1*(kappa >= 0) + 25*(kappa < 0) # flatness of the distribution
 
 # Method Tuning Parameters
 num.midpoints = 3
@@ -87,7 +87,7 @@ tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
 num.subsamples = 200
-max.iter.estimate = 1 #TODO: Change back if running curvature estimation experiments
+max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
 
 # Recorded simulated graph statistics

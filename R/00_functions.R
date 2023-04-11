@@ -574,9 +574,15 @@ sim_projected_uniform_ball <- function(n,p,kappa,radius){
   return(Z)
 }
 
-sim_projected_conic_distribution <- function(n,p,kappa,radius){
+sim_projected_conic_distribution <- function(n,p,kappa,radius, flatness = 1){
   # equal angle sampler
-  X <- mvtnorm::rmvnorm(n, mean = rep(0,p), sigma = diag(rep(1,p)))
+  if(p > 2){
+    sigma.flat = c(rep(flatness,2),rep(1, p - 2))
+  } else {
+    sigma.flat = rep(1,p)
+  }
+
+  X <- mvtnorm::rmvnorm(n, mean = rep(0,p), sigma = diag(sigma.flat))
   X = X/sqrt(rowSums(X**2)) # direction X
   # setting sampled radius to be fixed
   if(kappa > 0 ){
@@ -3805,25 +3811,24 @@ latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
 
   cluster.sizes <- as.numeric(rmultinom(n = 1, size = n, prob = PI))
   # TODO: Replace this back to the old version if it doesnt work
-  # if(kappa >= 0){
-  #   centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
-  # } else {
-  #   n.inner <- round(n.centers/2)
-  #   n.outer <- n.centers - n.inner
-  #   centers1 <- sim_projected_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
-  #   # inner radius
-  #   inner.radius <- centers.radius/(2.5)
-  #   #centers2 <- sim_projected_uniform_ball(n.inner,p,kappa,inner.radius)
-  #   centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
-  #   centers <- rbind(centers1,centers2)
-  #
-  #   ## Alternative:
-  #   centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
-  #
-  #
-  # }
+  if(kappa >= 0){
+    centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
+  } else {
+    # n.inner <- round(n.centers/2)
+    # n.outer <- n.centers - n.inner
+    # centers1 <- sim_projected_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
+    # # inner radius
+    # inner.radius <- centers.radius/(2.5)
+    # #centers2 <- sim_projected_uniform_ball(n.inner,p,kappa,inner.radius)
+    # centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
+    # centers <- rbind(centers1,centers2)
 
-  centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
+    ## Alternative:
+    centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
+
+    }
+
+
 
   clust.labels <- c()
   Z <- NULL
