@@ -26,25 +26,21 @@ if(slurm_arrayid == ""){
 }
 #Setting seed for reproducibility, but having a different
 #seed for parallel branches
-if(id == 15){
-  set.seed(-id)
-} else{
-  set.seed(id)
-}
+set.seed(id)
 
 # strange seed with euclidean sims
-if(id %% 6 == 4){
-  set.seed(-id)
-}
-
-strange.ids = c(40,58,82,88,94,136,160,166,172,178,196,304,328,340,358,382,424,472,496)
-if(id %in% strange.ids){
-  set.seed(10*id)
-}
+# if(id %% 6 == 4){
+#   set.seed(-id)
+# }
+# # strange seed with euclidean sims
+# strange.ids = c(40,58,82,88,94,136,160,166,172,178,196,304,328,340,358,382,424,472,496)
+# if(id %in% strange.ids){
+#   set.seed(10*id)
+# }
 
 # Simulation Parameters
 # Values of kappa to iterate
-kappa.set <- c(-2,-1,-0.5,0.001,0.5,1)
+kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 
 # Partitioning the simulations for running on the cluster
 
@@ -52,7 +48,7 @@ block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 
-n.sims = 10
+n.sims = 4
 sim.idx <- 1:n.sims
 
 

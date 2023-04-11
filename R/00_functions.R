@@ -3811,7 +3811,7 @@ latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
 
   cluster.sizes <- as.numeric(rmultinom(n = 1, size = n, prob = PI))
   # TODO: Replace this back to the old version if it doesnt work
-  if(kappa >= 0){
+  if(kappa > 3){
     centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
   } else {
     # n.inner <- round(n.centers/2)
