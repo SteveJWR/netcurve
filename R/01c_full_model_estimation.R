@@ -85,7 +85,7 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 max.num.cliques = 35
-num.subsamples = 200  #TODO: Change this back
+num.subsamples = 200   #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
 
@@ -125,8 +125,8 @@ for(scale.idx in seq(length(scale.set))){
   scale <- scale.set[scale.idx]
 
 
-  n <- round((3/4)*5000*scale)
-  n.centers <- round((3/4)*100*sqrt(scale))
+  n <- round(5000*scale)
+  n.centers <- round(100*sqrt(scale))
 
   ell = round(8 + 4*log2(scale)) # min clique-size
   approximate.variance <- sim.avg.variance
@@ -324,10 +324,11 @@ time.2 <- Sys.time()
 print(paste("Time Difference:", round(time.2 - time.1,3)))
 
 
-# filtered.kappa <- kappa.ests.results[kappa.ests.results[,6] == 1.2,]
-# filtered.kappa[filtered.kappa < -4000] = NA
-# colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
-# colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+filtered.kappa <- kappa.ests.results[kappa.ests.results[,4] == 1.5,]
+#filtered.kappa[filtered.kappa < -4000] = NA
+colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+
 
 
 

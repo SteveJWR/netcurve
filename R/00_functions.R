@@ -3805,32 +3805,33 @@ rmanifn <- function(n,mu,var.scale,kappa){
 
 latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
                                           variance.scales = rep(0.05,n.centers),
-                                          PI = rep(1/n.centers,n.centers), flatness = 1){
+                                          PI = rep(1/n.centers,n.centers), flatness = 1,
+                                          radius.ratio = 1/centers.radius, sample.ratio = 0.5){
 
   cluster.sizes <- as.numeric(rmultinom(n = 1, size = n, prob = PI))
   # TODO: Replace this back to the old version if it doesnt work
-  # if(kappa > 3){
-  #   centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
-  # } else {
-  #   # n.inner <- round(n.centers/2)
-  #   # n.outer <- n.centers - n.inner
-  #   # centers1 <- sim_projected_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
-  #   # # inner radius
-  #   # inner.radius <- centers.radius/(2.5)
-  #   # #centers2 <- sim_projected_uniform_ball(n.inner,p,kappa,inner.radius)
-  #   # centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
-  #   # centers <- rbind(centers1,centers2)
-  #
-  #   ## Alternative:
-  #   centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
-  #
-  # }
-  if(kappa !=  0){
-    mu = c(1,rep(0,p))
+  if(kappa > 0){
+    centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
   } else {
-    mu = rep(0,p)
+    n.inner <- round(n.centers*sample.ratio)
+    n.outer <- n.centers - n.inner
+    centers1 <- sim_latent_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
+    # inner radius
+    inner.radius <- centers.radius*radius.ratio
+    centers2 <- sim_latent_uniform_ball(n.inner,p,kappa,inner.radius, flatness)
+    #centers2 <- sim_projected_conic_distribution(n.centers,p,kappa,inner.radius)
+    centers <- rbind(centers1,centers2)
+
+    ## Alternative:
+    #centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
+
   }
-  centers <- rmanifn(n.centers,mu,centers.radius,kappa)
+  # if(kappa !=  0){
+  #   mu = c(1,rep(0,p))
+  # } else {
+  #   mu = rep(0,p)
+  # }
+  # centers <- rmanifn(n.centers,mu,centers.radius,kappa)
 
 
   clust.labels <- c()
