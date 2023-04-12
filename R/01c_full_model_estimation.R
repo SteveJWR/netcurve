@@ -90,7 +90,7 @@ max.iter.estimate = 3 #TODO: Change back if running curvature estimation experim
 d.yz.min = 1
 
 
-centers.set <- c(1,2,3,4,5)
+
 
 # Recorded simulated graph statistics
 graph.stat.names <- c("Graph size",
@@ -324,11 +324,11 @@ time.2 <- Sys.time()
 print(paste("Time Difference:", round(time.2 - time.1,3)))
 
 
-filtered.kappa <- kappa.ests.results[kappa.ests.results[,4] == 1.5,]
-#filtered.kappa[filtered.kappa < -4000] = NA
-colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
-colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
-
+# filtered.kappa <- kappa.ests.results[kappa.ests.results[,4] == 1.5,]
+# #filtered.kappa[filtered.kappa < -4000] = NA
+# colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+# colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+#
 
 
 
