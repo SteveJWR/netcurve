@@ -293,6 +293,7 @@ for(scale.idx in seq(length(scale.set))){
   }
 
 }
+
 #TODO: Remove this in final version
 if(round(kappa) == 0){
   kappa = 0
