@@ -4,7 +4,7 @@
 # Script to ensure consistency of curvature estimations and
 # ensure that the constant curvature test is valid
 #
-#
+
 rm(list = ls())
 
 library(lolaR)
@@ -26,6 +26,7 @@ if(slurm_arrayid == ""){
 }
 #Setting seed for reproducibility, but having a different
 #seed for parallel branches
+
 set.seed(id)
 
 # strange seed with euclidean sims
@@ -64,8 +65,9 @@ kappa = kappa.set[kappa.idx]
 # } else {
 #   centers.radius = 2.5
 # }
-centers.radius = 3
-inner.ratio = 1/4
+centers.radius = 2.5
+inner.ratio = 1/2
+inner.radius.ratio = 1/2
 
 centers.variance = 0.5**2
 
@@ -86,6 +88,7 @@ p = 3 # Latent Dimension of the data
 num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
+
 max.num.cliques = 35
 num.subsamples = 200   #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
@@ -157,6 +160,7 @@ for(scale.idx in seq(length(scale.set))){
                                           kappa,
                                           cluster.model.variance,
                                           PI = PI,
+                                          radius.ratio = inner.radius.ratio,
                                           sample.ratio = inner.ratio)
     # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa,
     #                                         centers.variance =centers.variance,
@@ -326,12 +330,12 @@ time.2 <- Sys.time()
 
 print(paste("Time Difference:", round(time.2 - time.1,3)))
 
-
-# filtered.kappa <- kappa.ests.results[kappa.ests.results[,4] == 1.5,]
-# #filtered.kappa[filtered.kappa < -4000] = NA
+#
+# filtered.kappa <- kappa.ests.results[kappa.ests.results[,4] == 1.3,]
+# filtered.kappa[filtered.kappa < -4000] = NA
 # colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
 # colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
-#
+
 
 
 
