@@ -65,6 +65,8 @@ kappa = kappa.set[kappa.idx]
 #   centers.radius = 2.5
 # }
 centers.radius = 3
+inner.ratio = 1/4
+
 centers.variance = 0.5**2
 
 # scale parameter for the size of the network
@@ -154,7 +156,8 @@ for(scale.idx in seq(length(scale.set))){
                                           centers.radius,
                                           kappa,
                                           cluster.model.variance,
-                                          PI = PI)
+                                          PI = PI,
+                                          sample.ratio = inner.ratio)
     # lpcm <- latent_position_cluster_model_2(n,n.centers, p, kappa,
     #                                         centers.variance =centers.variance,
     #                                         cluster.variance = approximate.variance,

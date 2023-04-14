@@ -12,25 +12,32 @@ library(scales)
 
 
 save.plots = T
-fig.height = 1000
-fig.width = 2000
-fig.res = 500
+fig.height = 1500
+fig.width = 1500
+fig.res = 350
 
 
 kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 #estimates
 ell.set <- c(6,8,12) #c(6,8,12,16)
 
+bad.ids = c(43,161,186,255,407,453)
+
+
 plot.dat <- matrix(NA, 0,3)
 tri.const.filter <- 1.55
 
-min.curvature = -50
+#min.curvature = -50
 
 for(tri.const.filter in seq(1,2, length.out = 21)) {
   plot.dat <- matrix(NA, 0,3)
   for(kappa in kappa.set){
     full.estimates <- matrix(NA, nrow = 0, ncol = 4)
-    for(block in 1:20){
+    for(block in 1:125){
+      id = which(kappa == kappa.set) + length(kappa.set)*(block - 1)
+      if(id %in% bad.ids){
+        next
+      }
       file <-  paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
       if(file.exists(file)){
         est.block <- read.csv(file)
@@ -70,6 +77,7 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
     ggtitle(TeX(sprintf(r'(Consistency of Estimator: $C_{\Delta}=%f$)', tri.const.filter))) +
     ylab("Estimate Deviation")+
     xlab("Clique Size") +
+    theme_bw() +
     scale_x_continuous(breaks = ell.set,labels = ell.set)
 
   #dev.off()
@@ -80,11 +88,15 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
 
 
 
-tri.const.filter = 1.3
+tri.const.filter = 1.2
 plot.dat <- matrix(NA, 0,3)
 for(kappa in kappa.set){
   full.estimates <- matrix(NA, nrow = 0, ncol = 4)
-  for(block in 1:20){
+  for(block in 1:125){
+    id = which(kappa == kappa.set) + length(kappa.set)*(block - 1)
+    if(id %in% bad.ids){
+      next
+    }
     file <-  paste0("results/estimates_kappa_",kappa,"_block_",block,".csv")
     if(file.exists(file)){
       est.block <- read.csv(file)
@@ -116,7 +128,7 @@ plot.summary.data <- plot.dat %>% group_by(CliqueSize, Curvature) %>%
 # plot(density(x.subset$Bias, na.rm = T,n = 5000), xlim = c(-2,2))
 
 plt <- ggplot(data = plot.summary.data, aes(x = CliqueSize, y = med, color = Curvature)) +
-  geom_line() +
+  geom_line(position=position_dodge(width=0.5)) +
   geom_errorbar(aes(ymax = q9, ymin = q1),position=position_dodge(width=0.5)) +
   geom_point(position=position_dodge(width=0.5)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
@@ -124,12 +136,13 @@ plt <- ggplot(data = plot.summary.data, aes(x = CliqueSize, y = med, color = Cur
   ggtitle(TeX(sprintf(r'(Consistency of Estimator: $C_{\Delta}=%f$)', tri.const.filter))) +
   ylab("Estimate Deviation")+
   xlab("Clique Size") +
+  theme_bw() +
   scale_x_continuous(breaks = ell.set,labels = ell.set)
 
-
+plt
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/GMM_consistency.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/GMM_consistency.png", width = fig.width, height = fig.height, res = fig.res)
 }
 
 
@@ -154,14 +167,17 @@ kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 ell.set <- c(6,8,12)#c(6,8,12,16)
 
 p.val.plot.dat <- matrix(NA, 0,3)
-tri.const.filter <- 1.3
+tri.const.filter <- 1.1
 for(tri.const.filter in seq(1,2, length.out = 21)) {
   p.val.plot.dat <- matrix(NA, 0,3)
   for(kappa in kappa.set){
 
     p.val.full <- matrix(NA, nrow = 0, ncol = 4)
-    for(block in 1:20){
-
+    for(block in 1:125){
+      id = which(kappa == kappa.set) + length(kappa.set)*(block - 1)
+      if(id %in% bad.ids){
+        next
+      }
       #file <-  paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
       file <-  paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
       if(file.exists(file)){
@@ -206,7 +222,7 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
 
   plt <- ggplot(data = p.val.plot.summary.data,
                 aes(x = CliqueSize, y = fpr05, color = Curvature)) +
-    geom_line() +
+    geom_line(position=position_dodge(width=0.5)) +
     geom_hline(yintercept = 0.05, linetype = "dashed") +
     # geom_errorbar(aes(ymax = fpr05 + 2*sqrt(var.fpr05),
     #                   ymin = fpr05 - 2*sqrt(var.fpr05))) +
@@ -214,6 +230,7 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
     ylab("False Positive Rate") +
     xlab("Clique Size") +
     ylim(c(0,1)) +
+    theme_bw() +
     scale_x_continuous(breaks = ell.set,labels = ell.set)
 
   plot(plt)
@@ -221,13 +238,16 @@ for(tri.const.filter in seq(1,2, length.out = 21)) {
 
 
 
-tri.const.filter = 1.3
+tri.const.filter = 1.2
 p.val.plot.dat <- matrix(NA, 0,3)
 for(kappa in kappa.set){
 
   p.val.full <- matrix(NA, nrow = 0, ncol = 4)
-  for(block in 1:20){
-
+  for(block in 1:125){
+    id = which(kappa == kappa.set) + length(kappa.set)*(block - 1)
+    if(id %in% bad.ids){
+      next
+    }
     #file <-  paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
     file <-  paste0("results/p_vals_kappa_",kappa,"_block_",block,".csv")
     if(file.exists(file)){
@@ -271,23 +291,27 @@ ggplot(data = p.val.plot.dat,
 
 plt <- ggplot(data = p.val.plot.summary.data,
               aes(x = CliqueSize, y = fpr05, color = Curvature)) +
-  geom_point() +
-  geom_line() +
+  geom_point(position=position_dodge(width=0.5)) +
+  geom_line(position=position_dodge(width=0.5)) +
   geom_hline(yintercept = 0.05, linetype = "dashed") +
-  # geom_errorbar(aes(ymax = fpr05 + 2*sqrt(var.fpr05),
-  #                   ymin = fpr05 - 2*sqrt(var.fpr05))) +
+  geom_errorbar(aes(ymax = fpr05 + 2*sqrt(var.fpr05),
+                    ymin = fpr05 - 2*sqrt(var.fpr05))) +
   ggtitle(TeX(sprintf(r'(FPR of Test: $C_{\Delta}=%f$)', tri.const.filter))) +
   ylab("False Positive Rate") +
   xlab("Clique Size") +
   ylim(c(0,.5)) +
+  theme_bw() +
   scale_x_continuous(breaks = ell.set,labels = ell.set)
 
 plot(plt)
 
 
+#
+tmp <- p.val.plot.dat %>% filter(Curvature == -1, CliqueSize == 12) %>%  select(pval)
+
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/GMM_fpr_cc_test.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/GMM_fpr_cc_test.png", width = fig.width, height = fig.height, res = fig.res)
 }
 
 
@@ -319,7 +343,7 @@ ell.set <- c(6,8,12)#c(6,8,12,16)
 
 ad.sphere.p.val.full <- matrix(NA, nrow = 0, ncol = 3)
 
-tri.const.filter = 1.3
+tri.const.filter = 1.2
 for(block in 1:20){
 
   file <-  paste0("results/adjacent_spheres_results_block_",block,".csv")
@@ -345,6 +369,7 @@ plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Power)) +
   geom_errorbar(aes(ymin = Power - 2*SD, ymax = Power + 2*SD)) +
   ylim(0,.7) +
   scale_x_continuous(breaks = pretty_breaks()) +
+  theme_bw() +
   ggtitle(TeX(sprintf(r'(Adjacent Spheres Power C.C. Test: $C_{\Delta}=%f$)', tri.const.filter))) +
   xlab("Clique Size")
 
@@ -353,7 +378,7 @@ plt
 
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/ad_spheres_power.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/ad_spheres_power.png", width = fig.width, height = fig.height, res = fig.res)
 }
 
 
@@ -364,7 +389,7 @@ ell.set <- c(6,8,12)
 
 multi.p.val.full <- matrix(NA, nrow = 0, ncol = 3)
 
-tri.const.filter = 1.4
+tri.const.filter = 1.2
 for(block in 1:20){
 
   file <-  paste0("results/multiview_results_block_",block,".csv")
@@ -393,19 +418,16 @@ plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Power)) +
   geom_errorbar(aes(ymin = Power - 2*SD, ymax = Power + 2*SD)) +
   ylim(0,.9) +
   scale_x_continuous(breaks = pretty_breaks()) +
-  ggtitle(TeX(sprintf(r'(Multi View Power of Constant Curvature Test: $C_{\Delta}=%f$)', tri.const.filter))) +
+  theme_bw() +
+  ggtitle(TeX(sprintf(r'(Multi View Power of C.C. Test: $C_{\Delta}=%f$)', tri.const.filter))) +
   xlab("Clique Size")
 
 dev.off()
 plt
-png(filename = "plots/multiview_power.png",
-    width = png.width, height = png.height, res = png.res)
-
-plt
 
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/multiview_power.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/multiview_power.png", width = fig.width, height = fig.height, res = fig.res)
 }
 
 
@@ -420,7 +442,7 @@ ell.set <- c(4,6,8,10,12)
 
 changepoint.mad <- matrix(NA, nrow = 0, ncol = 5)
 
-tri.const.filter = 1.4
+tri.const.filter = 1.2
 for(block in 1:100){
 
   file <-  paste0("results/changepoint_results_block_",block,".csv")
@@ -469,6 +491,75 @@ plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Mean_MAD), group = "Median", co
   scale_x_continuous(breaks = pretty_breaks()) +
   ggtitle(TeX(sprintf(r'(Consistency of Changepoints: $C_{\Delta}=%f$)', tri.const.filter))) +
   xlab("Clique Size") +
+  theme_bw() +
+  ylab("Mean AD")
+
+dev.off()
+plt
+
+
+if(save.plots){
+  plt %>%
+    ggexport(filename = "plots/changepoint_MeanAD.png", width = fig.width, height = fig.height, res = fig.res)
+}
+
+
+
+
+ell.set <- c(4,6,8,10,12)
+
+changepoint.mad <- matrix(NA, nrow = 0, ncol = 5)
+
+tri.const.filter = 1.4
+for(block in 1:100){
+
+  file <-  paste0("results/changepoint_results_median_block_",block,".csv")
+  if(file.exists(file)){
+    mad.block <- read.csv(file)
+    rownames(mad.block) = mad.block[,1]
+    mad.block <- mad.block[,2:6]
+    changepoint.mad <- rbind(changepoint.mad, mad.block[,1:5])
+
+  }
+
+}
+
+
+n.vec <- colSums(!is.na(changepoint.mad))
+mean.vec <- colMeans(changepoint.mad, na.rm = T)
+median.vec <- mean.vec
+median.vec[1] <- quantile(changepoint.mad[,1], 0.5)
+median.vec[2] <- quantile(changepoint.mad[,2], 0.5)
+median.vec[3] <- quantile(changepoint.mad[,3], 0.5)
+median.vec[4] <- quantile(changepoint.mad[,4], 0.5)
+median.vec[5] <- quantile(changepoint.mad[,5], 0.5)
+
+sd.vec <- colSDs(changepoint.mad)/sqrt(n.vec)
+
+plot.dat <- data.frame("Clique_Size" = ell.set,
+                       "Mean_MAD" = mean.vec,
+                       "Median_MAD" = median.vec,
+                       "SD" = sd.vec)
+
+plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Median_MAD), group = "Median", color = "black") +
+  geom_line() +
+  geom_errorbar(aes(ymin = Median_MAD - 2*SD, ymax = Median_MAD + 2*SD)) +
+  ylim(-0.1,.9) +
+  #geom_line(aes(x = Clique_Size, y = Mean_MAD), group = "Mean", color = "red") +
+  scale_x_continuous(breaks = pretty_breaks()) +
+  ggtitle(TeX(sprintf(r'(Consistency of Changepoints: $C_{\Delta}=%f$)', tri.const.filter))) +
+  xlab("Clique Size") +
+  ylab("Median AD")
+
+plt <- ggplot(plot.dat, aes(x = Clique_Size, y = Mean_MAD), group = "Median", color = "black") +
+  geom_line() +
+  geom_errorbar(aes(ymin = Mean_MAD - 2*SD, ymax = Mean_MAD + 2*SD)) +
+  ylim(-0.1,.9) +
+  #geom_line(aes(x = Clique_Size, y = Mean_MAD), group = "Mean", color = "red") +
+  scale_x_continuous(breaks = pretty_breaks()) +
+  ggtitle(TeX(sprintf(r'(Consistency of Changepoints: $C_{\Delta}=%f$)', tri.const.filter))) +
+  xlab("Clique Size") +
+  theme_bw() +
   ylab("Median MAD")
 
 dev.off()
@@ -477,10 +568,8 @@ plt
 
 if(save.plots){
   plt %>%
-    ggexport(filename = "plots/changepoint_MAD.eps", width = fig.width, height = fig.height, res = fig.res)
+    ggexport(filename = "plots/changepoint_MedianAD.png", width = fig.width, height = fig.height, res = fig.res)
 }
-
-
 
 
 
