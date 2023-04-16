@@ -67,7 +67,7 @@ kappa = kappa.set[kappa.idx]
 # }
 centers.radius = 2.5
 inner.ratio = 1/2
-inner.radius.ratio = 1/2
+inner.radius.ratio = 1/2 if we want better midpoints to form
 
 centers.variance = 0.5**2
 
