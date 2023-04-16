@@ -12,7 +12,7 @@ source("R/00_functions.R")
 
 #whether to write the files
 write.estimates.files = T
-write.p.val.files = T
+write.p.val.files = F
 write.graph.stats.files = F
 
 ### If Running on a cluster
@@ -72,7 +72,7 @@ inner.radius.ratio = 1/2
 centers.variance = 0.5**2
 
 # scale parameter for the size of the network
-scale.set <- c(1/sqrt(2),1,2) #c(1/sqrt(2),1,2,4) #corresponds to ell = 6,8,12
+scale.set <- c(1/sqrt(2),1,2,4) #c(1/sqrt(2),1,2,4) #corresponds to ell = 6,8,12
 #
 
 
@@ -90,7 +90,7 @@ tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 
 max.num.cliques = 35
-num.subsamples = 200   #TODO: Change this back
+num.subsamples = 1   #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
 
