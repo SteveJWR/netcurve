@@ -65,9 +65,9 @@ kappa = kappa.set[kappa.idx]
 # } else {
 #   centers.radius = 2.5
 # }
-centers.radius = 2.5
-inner.ratio = 0.4/2.5
-inner.radius.ratio = 1/8 #if we want better midpoints to form we need this in the unbounded spaces
+centers.radius = 2
+inner.ratio = 1/2
+inner.radius.ratio = 1/2 #if we want better midpoints to form we need this in the unbounded spaces
 
 centers.variance = 0.5**2
 
@@ -328,11 +328,11 @@ time.2 <- Sys.time()
 print(paste("Time Difference:", round(time.2 - time.1,3)))
 
 #
-# filtered.kappa <- kappa.ests.results[kappa.ests.results[,5] == 1.6,]
-# #filtered.kappa[filtered.kappa < -4000] = NA
-# filtered.kappa
-# colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
-# colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+filtered.kappa <- kappa.ests.results[kappa.ests.results[,5] == 1.6,]
+#filtered.kappa[filtered.kappa < -4000] = NA
+filtered.kappa
+colSDs(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
+colMeans(filtered.kappa[,1:(ncol(filtered.kappa) - 1)], na.rm = T)
 
 
 
