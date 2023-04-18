@@ -89,7 +89,7 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 
-max.num.cliques = 50
+max.num.cliques = 65 # 50 for kappa = -1, 65 for kappa = -2
 num.subsamples = 1   #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
