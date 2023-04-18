@@ -3812,7 +3812,7 @@ latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
   # TODO: Replace this back to the old version if it doesnt work
   if(kappa > 0){
     centers <- sim_latent_uniform_ball(n.centers,p,kappa,centers.radius, flatness)
-  } else {
+  } else if (kappa > -2){
     n.inner <- round(n.centers*sample.ratio)
     n.outer <- n.centers - n.inner
     centers1 <- sim_latent_uniform_ball(n.outer,p,kappa,centers.radius, flatness)
@@ -3825,6 +3825,8 @@ latent_position_cluster_model <- function(n,n.centers, p, centers.radius, kappa,
     ## Alternative:
     #centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius, flatness)
 
+  } else {
+    centers <- sim_projected_conic_distribution(n.centers,p,kappa,centers.radius)
   }
   # if(kappa !=  0){
   #   mu = c(1,rep(0,p))
