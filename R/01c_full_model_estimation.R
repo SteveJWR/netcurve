@@ -65,9 +65,9 @@ kappa = kappa.set[kappa.idx]
 # } else {
 #   centers.radius = 2.5
 # }
-centers.radius = 2
-inner.ratio = 1/2
-inner.radius.ratio = 1/2 #if we want better midpoints to form we need this in the unbounded spaces
+centers.radius = 2.5
+inner.ratio = 0.25/(2.5)
+inner.radius.ratio = 1/8 #if we want better midpoints to form we need this in the unbounded spaces
 
 centers.variance = 0.5**2
 
