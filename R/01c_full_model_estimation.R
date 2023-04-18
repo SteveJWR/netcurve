@@ -65,9 +65,9 @@ kappa = kappa.set[kappa.idx]
 # } else {
 #   centers.radius = 2.5
 # }
-centers.radius = 2.5
-inner.ratio = 0.25/(2.5)
-inner.radius.ratio = 1/8 #if we want better midpoints to form we need this in the unbounded spaces
+centers.radius = 2
+inner.ratio = 1/2
+inner.radius.ratio = 1/2 #if we want better midpoints to form we need this in the unbounded spaces
 
 centers.variance = 0.5**2
 
@@ -89,7 +89,7 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 
-max.num.cliques = 35
+max.num.cliques = 50
 num.subsamples = 1   #TODO: Change this back
 max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
