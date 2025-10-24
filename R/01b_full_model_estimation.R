@@ -49,7 +49,7 @@ block <-  floor((id - 1)/length(kappa.set)) + 1
 kappa.idx <- (id - 1) %% length(kappa.set) + 1
 
 
-n.sims = 4  #TODO: Change this back to 4
+n.sims = 10  #TODO: Change this back to 4
 sim.idx <- 1:n.sims
 
 
@@ -73,14 +73,16 @@ centers.variance = 0.5**2
 
 # scale parameter for the size of the network
 scale.set <- c(1/sqrt(2),1,2,4) #c(1/sqrt(2),1,2,4) #corresponds to ell = 6,8,12
-#
 
+
+#
 
 # parameters for the distribution of the latent traits
 mu = -3
 sd = 3
 
 sim.avg.variance <- 0.25**2 # average variance the variance of the clusters of the GMM
+
 p = 3 # Latent Dimension of the data
 #flatness = 1*(kappa >= 0) + 25*(kappa < 0) # flatness of the distribution
 
@@ -89,9 +91,9 @@ num.midpoints = 3
 tri.const = 1.4
 tri.const.seq <- (seq(0, 1, length.out = 21)) + 1 # Tuning parameter set
 
-max.num.cliques = 65 # 50 for kappa = -1, 65 for kappa = -2
+max.num.cliques = 75 # 50 for kappa = -1, 65 for kappa = -2
 num.subsamples = 1   #TODO: Change this back
-max.iter.estimate = 5 #TODO: Change back if running curvature estimation experiments
+max.iter.estimate = 3 #TODO: Change back if running curvature estimation experiments
 d.yz.min = 1
 
 

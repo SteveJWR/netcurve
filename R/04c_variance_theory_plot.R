@@ -1,13 +1,13 @@
 
 
 # chose the true curvature.
-#TODO: Fix the theoretical variance here.
 source("R/00_functions.R")
 
 library(ggpubr)
+library(lolaR)
 save.plot = T
-fig.height = 1800
-fig.width = 3000
+fig.height = 2600 # 1800
+fig.width = 3200 # 3000
 fig.res = 350
 
 
@@ -15,21 +15,21 @@ scale.plot = 1
 max.dist.radius = 2
 dyz = 2
 location.scale = dyz/2
-n.grid = 200 # 200
-kappa.set <- c(-2,-1,0,0.5,1)
+n.grid = 200 # TODO: return to 200
+kappa.set <- c(-2,-1,-0.5,0,0.5,1)
 plots.list <- list()
 datasets <- list()
 reference.widths <- c()
 distances <- list()
 
-sd.plot.cap = 15
+# Magnitude of the sd capped for plotting
+sd.plot.cap = 50 # TODO: check whether 15 is reasonable
 
+p = 2
 for(kappa.idx in seq_along(kappa.set)){
 
   kappa.true <- kappa.set[kappa.idx]
 
-
-  p = 2
   if(kappa.true == 0){
     Z.init <- c(c(1,rep(0,p-1)),
                 c(-1,rep(0,p-1)),
@@ -88,7 +88,7 @@ for(kappa.idx in seq_along(kappa.set)){
     var.theory.out <- Re(var.theory.out)
 
     # capping the sd for plotting purposes
-    dat[j,3] <- min(sqrt(sqrt(var.theory.out)), sd.plot.cap)
+    dat[j,3] <- min(sqrt(var.theory.out), sd.plot.cap)
   }
 
   if(kappa.true == 0){
@@ -100,11 +100,11 @@ for(kappa.idx in seq_along(kappa.set)){
   }
   reference.widths[kappa.idx] <- ref.x
   dat <- data.frame(dat)
-  colnames(dat) <- c("x","y","sqrt_sd","manual_grad")
+  colnames(dat) <- c("x","y","SD","manual_grad")
 
   datasets[[kappa.idx]] <- dat
   b = round(seq(0,sd.plot.cap, length.out = 6))
-  plot.tmp <- ggplot(datasets[[kappa.idx]], aes(x, y, fill=sqrt_sd)) +
+  plot.tmp <- ggplot(datasets[[kappa.idx]], aes(x, y, fill=SD)) +
     geom_raster() + theme_classic() +
     #scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF")) +
     #scale_fill_viridis_c(option = "magma") +
@@ -112,28 +112,37 @@ for(kappa.idx in seq_along(kappa.set)){
                          colours=c("navyblue", "darkmagenta", "red", "darkorange1", "yellow","chartreuse1"),
                          breaks=b, labels=format(b)) +
     guides(fill=guide_legend(reverse=TRUE))  +
-    geom_point(aes(x=0,y=0),colour="grey") +
-    geom_point(aes(x=reference.widths[!!kappa.idx],y=0),colour="grey") +
-    geom_point(aes(x=-reference.widths[!!kappa.idx],y=0),colour="grey") +
+    geom_point(aes(x=0,y=0),colour="black") +
+    geom_point(aes(x=reference.widths[!!kappa.idx],y=0),colour="black") +
+    geom_point(aes(x=-reference.widths[!!kappa.idx],y=0),colour="black") +
     ggtitle(paste("SD Heatmap, Curvature: ", round(kappa.true,1)))
   #plot.tmp
   plots.list[[kappa.idx]] <- plot.tmp
-  # ggplot(dat, aes(x, y, fill=manual_grad)) +
-  #   geom_raster() + theme_classic() +
-  #   scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF")) +
-  #   guides(fill=guide_legend(reverse=TRUE))
+
 }
 
 
 
+save.plot.data <- F
+if(save.plot.data){
+  save(datasets, file = "plots/theoretical_variance_plot_datasets.rda")
+}
+
+
+load.plot.data <- T
+if(load.plot.data){
+  datasets <- load("plots/theoretical_variance_plot_datasets.rda")
+}
+
+
 dev.off()
 ggarrange(plots.list[[1]], plots.list[[2]], plots.list[[3]],
-          plots.list[[4]], plots.list[[5]],  common.legend = TRUE)
+          plots.list[[4]], plots.list[[5]], plots.list[[6]],  common.legend = TRUE)
 
 
 if(save.plot){
   ggarrange(plots.list[[1]], plots.list[[2]], plots.list[[3]],
-            plots.list[[4]], plots.list[[5]],  common.legend = TRUE) %>%
+            plots.list[[4]], plots.list[[5]], plots.list[[6]],  common.legend = TRUE) %>%
     ggexport(filename = "plots/theoretical_variance.png", width = fig.width, height = fig.height, res = fig.res)
 }
 
